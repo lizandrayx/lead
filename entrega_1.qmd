@@ -24,20 +24,23 @@ tinytex::install_tinytex()
 
 Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
 
-# Análises
-
-## Análise 1
-
-## Análise 2
 
 ```{r}
-#| label: fig-
+#| label: fig- histograma
 #| fig-cap: "Gráfico "
+histograma
 
 
 
 ```
+# Análises
 
+## Análise 1
+De modo geral, entre 1880 e 1889, mesmo que apresentem variações modera-
+das, os dados sugerem um fortalecimento das lojas, mesmo que algumas variações
+negativas tenham ocorrido em anos isolados, o comportamento geral apresenta uma
+melhoria no desempenho das lojas no período analisado.
+## Análise 2
 
 ::: {#quad- layout-align="center" quad-pos="H"}
 ```{=latex}
