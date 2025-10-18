@@ -20,7 +20,6 @@ library(tinytex)
 tinytex::install_tinytex((force = TRUE))
 ```
 
-<<<<<<< HEAD
 # Análises
 
 ## Análise 1
@@ -33,39 +32,12 @@ Esta é uma análise descritiva temporal, que busca observar tendências, varia�
 #| label: fig-histograma
 #| fig-cap: "Gráfico de linhas da Receita Média da loja dos anos 1880 até 1889"
 histograma
-=======
-# Objetivo
-
-Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
-
-
-```{r}
-#| label: fig- histograma
-#| fig-cap: "Gráfico "
-histograma
-
-
-
->>>>>>> cb0b5038e95811f306d747589229f11a3980c92d
 ```
-# Análises
 
-<<<<<<< HEAD
 Com base no gráfico $\ref{fig-histograma}$ de linhas apresentado, analisa-se uma mudança significativa na receita média das lojas. 
 Entre 1880 e 1884, observa-se um crescimento moderado, com pequenas oscilações que sugerem  estabilidade nas vendas. A partir de 1885, há um aumento mais acentuado, indicando um período de expansão comercial ou aumento no volume de vendas.
 O destaque está em 1889, onde ocorre um salto expressivo na receita média, possivelmente relacionado a eventos econômicos, abertura de novas lojas ou estratégias de mercado bem-sucedidas.
 Apesar de pequenas variações anuais, a tendência geral é positiva, refletindo crescimento sustentado ao longo da década de 1880.
-=======
-## Análise 1
-De modo geral, entre 1880 e 1889, mesmo que apresentem variações modera-
-das, os dados sugerem um fortalecimento das lojas, mesmo que algumas variações
-negativas tenham ocorrido em anos isolados, o comportamento geral apresenta uma
-melhoria no desempenho das lojas no período analisado.
-## Análise 2
-
-::: {#quad- layout-align="center" quad-pos="H"}
-```{=latex}
->>>>>>> cb0b5038e95811f306d747589229f11a3980c92d
 
 
 ##Análise 2
