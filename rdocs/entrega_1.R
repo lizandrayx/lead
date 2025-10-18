@@ -78,6 +78,7 @@ analise1 <- novo_banco2 %>%
     freq_label = gsub("\\.", ",", relative_freq) %>% paste("%", sep = ""),
     label = str_c("R$ ", round(freq, 0), " (", freq_label, ")") %>% str_squish()
   )
+<<<<<<< HEAD
 
 histograma <- ggplot(analise1) +
   aes(x = ano, y = receita_media, group = 1) +
@@ -131,3 +132,21 @@ ggplot(clientela %>% filter(Sex == "Mulher")) +
   theme_estat()
 
 ggsave("variacao_peso_altura_mulheres.pdf", width = 158, height = 93, units = "mm")
+=======
+histograma<- ggplot(analise1, aes(x = factor(ano), y = receita_media, label = label)) +
+  geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
+  geom_text(
+    position = position_dodge(width = 0.9),
+    vjust = -0.5,
+    size = 3
+  ) +
+  labs(
+    x = "Ano",
+    y = "Receita média (R$)",
+    title = "Receita Média das Lojas (1880–1889)"
+  ) +
+  theme_estat() 
+ggsave("receita_media_1880_1889.pdf", width = 158, height = 93, units = "mm")
+histograma
+
+>>>>>>> cb0b5038e95811f306d747589229f11a3980c92d

@@ -20,7 +20,8 @@ library(tinytex)
 tinytex::install_tinytex((force = TRUE))
 ```
 
-<<<<<<< HEAD
+
+
 # Análises
 
 ## Análise 1
@@ -29,43 +30,20 @@ A variável ano é quantitativa discreta, pois representa períodos temporais de
 Esta é uma análise descritiva temporal, que busca observar tendências, variações e possíveis padrões de crescimento nas receitas ao longo do tempo.
 
 
+
+
 ```{r}
 #| label: fig-histograma
 #| fig-cap: "Gráfico de linhas da Receita Média da loja dos anos 1880 até 1889"
 histograma
-=======
-# Objetivo
-
-Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
-
-
-```{r}
-#| label: fig- histograma
-#| fig-cap: "Gráfico "
-histograma
-
-
-
->>>>>>> cb0b5038e95811f306d747589229f11a3980c92d
 ```
-# Análises
 
-<<<<<<< HEAD
+
+
 Com base no gráfico $\ref{fig-histograma}$ de linhas apresentado, analisa-se uma mudança significativa na receita média das lojas. 
 Entre 1880 e 1884, observa-se um crescimento moderado, com pequenas oscilações que sugerem  estabilidade nas vendas. A partir de 1885, há um aumento mais acentuado, indicando um período de expansão comercial ou aumento no volume de vendas.
 O destaque está em 1889, onde ocorre um salto expressivo na receita média, possivelmente relacionado a eventos econômicos, abertura de novas lojas ou estratégias de mercado bem-sucedidas.
 Apesar de pequenas variações anuais, a tendência geral é positiva, refletindo crescimento sustentado ao longo da década de 1880.
-=======
-## Análise 1
-De modo geral, entre 1880 e 1889, mesmo que apresentem variações modera-
-das, os dados sugerem um fortalecimento das lojas, mesmo que algumas variações
-negativas tenham ocorrido em anos isolados, o comportamento geral apresenta uma
-melhoria no desempenho das lojas no período analisado.
-## Análise 2
-
-::: {#quad- layout-align="center" quad-pos="H"}
-```{=latex}
->>>>>>> cb0b5038e95811f306d747589229f11a3980c92d
 
 
 ##Análise 2
@@ -73,11 +51,15 @@ O objetivo dessa análise é entender a relação entre o peso (em quilogramas) 
 centímetros) dos clientes da empresa Old Town Roa. A variável peso e altura são quantitativas contínuas, pois assumem valores numéricos dentro de um intervalo real, representando medidas físicas obtidas individualmente para cada cliente.
 Trata-se de uma análise descritiva bivariada, que busca investigar como essas duas variáveis se comportam em conjunto, observando se existe uma tendência de aumento ou diminuição simultânea.
 
+
+
 ```{r}
 #| label: dispersao
 #| fig-cap: "Gráfico de linhas da Receita Média da loja dos anos 1880 até 1889"
 dispersao
 ```
+
+
 
 Com base no gráfico de dispersão $\ref{fig-dispersao}$, observa-se que os pontos formam um padrão ascendente, sugerindo uma relação linear positiva entre peso e altura.
 De modo geral, à medida que a altura aumenta, o peso também tende a aumentar, o que indica que indivíduos mais altos costumam apresentar maior massa corporal.
@@ -85,4 +67,5 @@ Essa relação é consistente com padrões biológicos esperados, refletindo pro
 Embora existam pequenas variações individuais, possivelmente associadas a diferenças na constituição física ou estilo de vida, o comportamento geral demonstra uma tendência conjunta de crescimento, evidenciando correlação direta entre as variáveis analisadas.
 O coeficiente de correlação de Pearson obtido (r = 0,70) reforça essa relação linear positiva, indicando uma associação moderada a forte entre peso e altura.
 Isso confirma que indivíduos mais altos tendem a apresentar maior peso corporal, de forma coerente com padrões biológicos esperados.
+
 
