@@ -7,10 +7,8 @@ output-file: titulo do projeto
 
 ```{r}
 #| include: false
-source("rdocs/packages.R")
-```
 source("rdocs/source/packages.R")
-setwd("C:/Users/lizan/OneDrive/Documentos/GitHub/lead")
+```
 
 # Define o arquivo principal de dados (com nome exato)
 dados <- "relatorio_old_town_road (1).xlsx"
@@ -74,53 +72,6 @@ novo_banco2 <- novo_banco2 %>%
   mutate(ano= year(Date))
 view(novo_banco2)
 
-#analise 1:
-
-library(dplyr)  
-analise1 <- novo_banco2 %>%
-  group_by(ano, StoreID) %>%
-  summarise(receita_total = sum(valor_real), .groups = "drop") %>%
-  group_by(ano) %>%
-  summarise(receita_media = mean(receita_total))
-view(analise1)
-
-library(dplyr)
-library(lubridate)
-library(readxl)
-
-dados <- "relatorio_old_town_road (1).xlsx"
-
-relatorio <- read_xlsx(dados, sheet = "relatorio_vendas")
-vendas <- read_xlsx(dados, sheet = "infos_vendas")
-produtos <- read_xlsx(dados, sheet = "infos_produtos")
-
-vendas <- vendas %>%
-  rename(SaleID = Sal3ID)
-
-produtos <- produtos %>%
-  rename(ItemID = Ite3ID)
-
-novo_banco <- left_join(produtos, vendas, by = "ItemID")
-novo_banco2 <- left_join(relatorio, novo_banco, by = "SaleID")
-
-novo_banco2 <- novo_banco2 %>%
-  mutate(
-    valor_real = UnityPrice * 5.31,                      
-    receita_venda = valor_real * Quantity,               
-    ano = year(Date)                                     
-  )
-
-analise1 <- novo_banco2 %>%
-  group_by(ano, StoreID) %>%
-  summarise(receita_total_loja = sum(receita_venda), .groups = "drop") %>%
-  group_by(ano) %>%
-  summarise(receita_media = mean(receita_total_loja))
-
-
-view(analise1)
-
-library(ggplot2)
-
 histograma <- ggplot(analise1, aes(x = ano, y = receita_media, group = 1)) +
   geom_line(size = 1, colour = "#A11D21") +
   geom_point(colour = "#A11D21", size = 2) +
@@ -147,6 +98,7 @@ clientela <- clientes %>%
     Peso_kg = Weight_lbs * 0.453592,
     Altura_cm = Height_dm * 10
   )
+n_clientes <- nrow(clientela)
 
 resumo_altura_peso <- clientela %>%
   summarise(
@@ -247,7 +199,7 @@ dados_top3_lojas <- novo_banco2 %>%
   filter(ano == 1889, StoreID %in% top3_lojas$StoreID)
 
 ranking_produtos <- dados_top3_lojas %>%
-  group_by(StoreID, ItemID, NameProduct) %>%  # <-- corrigido aqui!
+  group_by(StoreID, ItemID, NameProduct) %>%
   summarise(
     quantidade_vendida = sum(Quantity, na.rm = TRUE),
     receita_total = sum(receita_venda, na.rm = TRUE),
@@ -268,9 +220,29 @@ top3_final <- top3_produtos_por_loja %>%
     Receita_Total = receita_total
   ) %>%
   arrange(Loja, desc(Receita_Total))
+
 view(top3_final)
 
+grafico_top3 <- ggplot(top3_final, aes(
+  x = reorder(Produto, Receita_Total),
+  y = Receita_Total,
+  fill = Loja
+)) +
+  geom_col(show.legend = TRUE) +
+  coord_flip() +
+  labs(
+    title = "Top 3 produtos nas 3 lojas com maior receita em 1889",
+    x = "Produto",
+    y = "Receita Total (R$)"
+  ) +
+  scale_fill_manual(values = c("#A11D21", "#D96B50", "#F0B7A4")) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    axis.title = element_text(face = "bold")
+  )
 
+grafico_top3
 
 # Introdução
 O relatório foi desenvolvido pela Empresa Júnior de Estatística da Universidade de Brasília (ESTAT) a partir da solicitação de João Sábio, proprietário da Old Town Road Ltda, uma holding que atua no setor comercial do faroeste. O objetivo central deste projeto é fornecer análises estatísticas descritivas que auxiliem o cliente na compreensão do mercado em uma determinada região de interesse para novos investimentos.
