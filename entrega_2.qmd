@@ -20,56 +20,92 @@ install.packages('tinytex')
 library(tinytex)
 tinytex::install_tinytex()
 ```
+dados <- ("relatorio_old_town_road (1).xlsx")
+relatorio <- read_xlsx(dados, sheet = "relatorio_vendas")
+vendas <- read_xlsx(dados, sheet = "infos_vendas")
+produtos <- read_xlsx(dados, sheet = "infos_produtos")
+funcionarios <- read_xlsx(dados, sheet = "infos_funcionarios")
+cidades <-  read_xlsx(dados, sheet = "infos_cidades")
+clientes <-  read_xlsx(dados, sheet = "infos_clientes")
+lojas <-  read_xlsx(dados, sheet = "infos_lojas")
 
-# Objetivo
+vendas <- vendas %>%
+  rename(SaleID = Sal3ID)
 
-Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
+lojas <- lojas %>%
+  rename(StoreID = Stor3ID )
+
+produtos <- produtos %>%
+  rename(ItemID = Ite3ID )
+
+novo_banco <- left_join(produtos, vendas, by= "ItemID")
+novo_banco2 <- left_join(relatorio, novo_banco, by= "SaleID")
+
+novo_banco2<- novo_banco2 %>%
+  mutate(valor_real= UnityPrice*5.31) 
+
+novo_banco2 <- novo_banco2 %>%
+  mutate(ano= year(Date))
+
+clientela <- clientes %>%
+  select(Cli3ntID, Name, Age, Sex, Weight_lbs, Height_dm) %>%
+  mutate(
+    Peso_kg = Weight_lbs * 0.453592,
+    Altura_cm = Height_dm * 10
+  )
+
+resumo_altura_peso <- clientela %>%
+  summarise(
+    media_peso = mean(Peso_kg, na.rm = TRUE),
+    desvio_peso = sd(Peso_kg, na.rm = TRUE),
+    media_altura = mean(Altura_cm, na.rm = TRUE),
+    desvio_altura = sd(Altura_cm, na.rm = TRUE)
+  )
+
+correlacao <- cor(clientela$Peso_kg, clientela$Altura_cm, use = "complete.obs")
+correlacao_formatado <- format(round(correlacao, 3), nsmall = 3)
+correlacao
+
+dispersao <- clientela %>%
+  ggplot(aes(x = Altura_cm, y = Peso_kg)) +
+  geom_point(colour = "#A11D21", size = 2.5, alpha = 0.6) +
+  labs(
+    x = "Altura (cm)",
+    y = "Peso (kg)",
+    title = "Relação entre Peso e Altura dos Clientes"
+  ) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_line(color = "grey90"),
+    panel.grid.minor = element_blank()
+  )
+
+ggsave("peso_altura_bivariado.pdf", dispersao, width = 158, height = 93, units = "mm")
+view(clientela)
 
 # Análises
 
-## Análise 3
+## Análise 2
+O objetivo desta análise é compreender a relação entre o **peso (kg)** e a **altura (cm)** dos clientes da empresa **Old Town Road Ltda.**  
+As variáveis analisadas são **quantitativas contínuas**, representando medidas físicas obtidas individualmente para cada cliente.  
+Trata-se de uma **análise descritiva bivariada**, cujo intuito é identificar padrões de associação e tendências de crescimento conjunto entre essas duas medidas corporais.
 
-## Análise 4
+O conjunto de dados contém `r n_clientes` observações únicas, sem duplicações.  
+Antes da análise, as medidas foram convertidas para o **Sistema Internacional** (peso em quilogramas e altura em centímetros), garantindo consistência nas comparações.
 
 ```{r}
-#| label: fig-
-#| fig-cap: "Gráfico "
-
-
-
+#| label: dispersao
+#| fig-cap: "Gráfico de linhas da Receita Média da loja dos anos 1880 até 1889"
+dispersao
 ```
+Conforme observado na Figura $\ref{fig-dispersao}$, os pontos seguem um padrão ascendente, sugerindo uma relação linear positiva entre peso e altura.
+À medida que a altura aumenta, o peso tende a crescer, refletindo a proporcionalidade esperada entre estatura e massa corporal.
 
+O coeficiente de correlação de Pearson, calculado como r = 0,6971007 correlacao_formatado, confirma essa relação com uma associação positiva moderada a forte.
+Isso indica que clientes mais altos tendem, em média, a apresentar maior peso corporal — comportamento coerente com padrões biológicos e antropométricos.
 
-::: {#quad- layout-align="center" quad-pos="H"}
-```{=latex}
+Embora existam variações individuais, possivelmente associadas a diferenças de constituição física, idade ou estilo de vida, o comportamento global aponta para uma relação consistente entre as variáveis analisadas.
 
-
-
-```
-
-Medidas resumo da 
-:::
-
-
-
-::: {#tbl-modalidades layout-align="center" tbl-pos="H"}
-```{=latex}
-
-
-```
-
-
-:::
-
-
-
-
-$\ref{fig-}$
-
-[@tbl-]
-
-
-[**Quadro** @quad-]
 
 
 
