@@ -148,7 +148,6 @@ clientela <- clientes %>%
     Altura_cm = Height_dm * 10
   )
 
-# Estatísticas complementares
 resumo_altura_peso <- clientela %>%
   summarise(
     media_peso = mean(Peso_kg, na.rm = TRUE),
@@ -157,12 +156,10 @@ resumo_altura_peso <- clientela %>%
     desvio_altura = sd(Altura_cm, na.rm = TRUE)
   )
 
-# Correlação
 correlacao <- cor(clientela$Peso_kg, clientela$Altura_cm, use = "complete.obs")
 correlacao_formatado <- format(round(correlacao, 3), nsmall = 3)
 correlacao
 
-# Gráfico revisado
 dispersao <- clientela %>%
   ggplot(aes(x = Altura_cm, y = Peso_kg)) +
   geom_point(colour = "#A11D21", size = 2.5, alpha = 0.6) +
