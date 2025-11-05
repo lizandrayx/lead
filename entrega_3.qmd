@@ -19,60 +19,91 @@ install.packages('tinytex')
 library(tinytex)
 tinytex::install_tinytex()
 ```
+dados <- ("relatorio_old_town_road (1).xlsx")
+relatorio <- read_xlsx(dados, sheet = "relatorio_vendas")
+vendas <- read_xlsx(dados, sheet = "infos_vendas")
+produtos <- read_xlsx(dados, sheet = "infos_produtos")
+funcionarios <- read_xlsx(dados, sheet = "infos_funcionarios")
+cidades <-  read_xlsx(dados, sheet = "infos_cidades")
+clientes <-  read_xlsx(dados, sheet = "infos_clientes")
+lojas <-  read_xlsx(dados, sheet = "infos_lojas")
 
+vendas <- vendas %>%
+  rename(SaleID = Sal3ID)
 
+lojas <- lojas %>%
+  rename(StoreID = Stor3ID )
 
+produtos <- produtos %>%
+  rename(ItemID = Ite3ID )
 
-# Objetivo
+novo_banco <- left_join(produtos, vendas, by= "ItemID")
+novo_banco2 <- left_join(relatorio, novo_banco, by= "SaleID")
 
-Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
+novo_banco2<- novo_banco2 %>%
+  mutate(valor_real= UnityPrice*5.31) 
 
-# Análises
+novo_banco2 <- novo_banco2 %>%
+  mutate(ano= year(Date))
 
-## Análise 5
+# ANÁLISE 3 - Idade dos clientes de Âmbar Seco a depender da loja (26/10)
 
-## Análise 6
+cidades <- cidades %>%
+  rename(CityID = C1tyID)
 
+clientes <- clientes %>%
+  rename(ClientID = Cli3ntID)
+
+# Junta todas as tabelas principais
+banco_completo <- relatorio %>%
+  left_join(vendas, by = "SaleID") %>%
+  left_join(lojas, by = "StoreID") %>%
+  left_join(cidades, by = "CityID") %>%
+  left_join(clientes, by = "ClientID")
+
+clientes_ambar <- banco_completo %>%
+  filter(tolower(NameCity) == "âmbar seco" | tolower(NameCity) == "ambar seco") %>%
+  distinct(ClientID, .keep_all = TRUE) %>%
+  filter(!is.na(Age))
+
+box <- ggplot(clientes_ambar) +
+  aes(x = reorder(NameStore, Age, FUN = median), y = Age) +
+  geom_boxplot(fill = "#A11D21", width = 0.5) +
+  stat_summary(
+    fun = "mean",
+    geom = "point",
+    shape = 23,
+    size = 3,
+    fill = "white"
+  ) +
+  labs(
+    x = "Nome da Loja de Âmbar Seco",
+    y = "Idade dos Clientes (anos)",
+    title = "Boxplot da Idade dos Clientes por Loja — Âmbar Seco"
+  ) +
+  theme_estat()  # padrão ESTAT
+
+ggsave(
+  "idade_clientes_ambar_boxplot.pdf",
+  plot = box,
+  width = 158,
+  height = 93,
+  units = "mm"
+)
+
+print(box)
+
+summary(clientes_ambar$Age)
+
+## Análise 3
+Com o intuito de compreender melhor o perfil etário dos clientes nas diferentes lojas da cidade de Âmbar Seco, optou-se pela utilização do gráfico boxplot (ou diagrama de caixa). Esse tipo de visualização é especialmente adequado para comparar distribuições de uma variável quantitativa, neste caso, a idade dos clientes, entre categorias distintas, como as diversas lojas analisadas.
+O boxplot permite observar, de forma sintética e objetiva, medidas de tendência central, dispersão e assimetria, além de identificar valores atípicos que podem indicar variações importantes no público atendido por cada loja.
 ```{r}
-#| label: fig-
-#| fig-cap: "Gráfico "
-
-
-
+#| label: box
+#| fig-cap: "Idade dos clientes de Âmbar Seco a depender da loja"
+box
 ```
-
-
-::: {#quad- layout-align="center" quad-pos="H"}
-```{=latex}
-
-
-
-```
-
-Medidas resumo da 
-:::
-
-
-
-::: {#tbl-modalidades layout-align="center" tbl-pos="H"}
-```{=latex}
-
-
-```
-
-
-:::
-
-
-
-
-$\ref{fig-}$
-
-[@tbl-]
-
-
-[**Quadro** @quad-]
-
+Com base no boxplot apresentado, a maior concentração de idades está entre 28 e 44 anos, o intervalo que compreende 50% dos clientes. A mediana (36 anos) e a média (37,48) são muito próximas — indicando simetria na distribuição (não há forte viés para jovens nem para idosos). Os outliers estão acima dos 60–65 anos, chegando até 80 anos.Isso mostra que, embora o público predominante seja adulto jovem e de meia-idade, há clientes mais idosos, possivelmente fiéis ou tradicionais na cidade. 
 
 
 
