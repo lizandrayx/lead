@@ -161,13 +161,11 @@ box <- ggplot(clientes_ambar) +
     fill = "white"
   ) +
   labs(
-    x = "Nome da Loja de Âmbar Seco",
-    y = "Idade dos Clientes (anos)",
-    title = "Boxplot da Idade dos Clientes por Loja — Âmbar Seco"
-  ) +
-  theme_estat()  # padrão ESTAT
+  x = "Nome da Loja de Âmbar Seco",
+  y = "Idade dos Clientes (anos)"
+) +
+theme_estat()
 
-# Salva o gráfico
 ggsave(
   "idade_clientes_ambar_boxplot.pdf",
   plot = box,
