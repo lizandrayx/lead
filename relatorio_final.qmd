@@ -1,331 +1,247 @@
 ---
-title: "Projeto fantasma"
-
+title: "Análise Estatística da Old Town Road Ltda."
+header-includes:
+  - \authors{Lizandra}
+  - \client{Old Road Town}
 # Nome do documento PDF gerado
-output-file: titulo do projeto
+output-file: "Projeto_Old_Town_Road_Liz"
 ---
 
 ```{r}
 #| include: false
 source("rdocs/source/packages.R")
+source("rdocs/entrega_1_limpo.R")
 ```
 
-# Define o arquivo principal de dados (com nome exato)
-dados <- "relatorio_old_town_road (1).xlsx"
-
-# Corrige o repositório (evita o aviso '404 Not Found')
-options(repos = c(CRAN = "https://cran.rstudio.com/"))
-
-
-# ---------------------------------------------------------------------------- #
-
-#        ______   _____  ________      ________ 
-#      |  ____| / ____| |__   __| /\  |__   __|
-#     | |__    | (___     | |   /  \    | |   
-#    |  __|    \___ \    | |  / /\ \   | |   
-#   | |____   ____) |   | |  /____ \  | |   
-#  |______   |_____/   |_| /_/    \_\|_|   
-#  
-#         Consultoria estatística 
-#
-
-# ---------------------------------------------------------------------------- #
-# ############################## README ###################################### #
-# Consultor, favor utilizar este arquivo .R para realizar TODAS as análises
-# alocadas a você neste projeto pelo gerente responsável, salvo instrução 
-# explícita do gerente para mudança.
-#
-# Escreva seu código da forma mais clara e legível possível, eliminando códigos
-# de teste depreciados, ou ao menos deixando como comentário. Dê preferência
-# as funções dos pacotes contidos no Tidyverse para realizar suas análises.
-# ---------------------------------------------------------------------------- #
-library(tidyverse)
-library(lubridate)
-library(ggplot2)
-library(readxl)
-
-dados <- ("relatorio_old_town_road (1).xlsx")
-relatorio <- read_xlsx(dados, sheet = "relatorio_vendas")
-vendas <- read_xlsx(dados, sheet = "infos_vendas")
-produtos <- read_xlsx(dados, sheet = "infos_produtos")
-funcionarios <- read_xlsx(dados, sheet = "infos_funcionarios")
-cidades <-  read_xlsx(dados, sheet = "infos_cidades")
-clientes <-  read_xlsx(dados, sheet = "infos_clientes")
-lojas <-  read_xlsx(dados, sheet = "infos_lojas")
-
-vendas <- vendas %>%
-  rename(SaleID = Sal3ID)
-
-lojas <- lojas %>%
-  rename(StoreID = Stor3ID )
-
-produtos <- produtos %>%
-  rename(ItemID = Ite3ID )
-
-novo_banco <- left_join(produtos, vendas, by= "ItemID")
-novo_banco2 <- left_join(relatorio, novo_banco, by= "SaleID")
-
-novo_banco2<- novo_banco2 %>%
-  mutate(valor_real= UnityPrice*5.31) 
-
-novo_banco2 <- novo_banco2 %>%
-  mutate(ano= year(Date))
-view(novo_banco2)
-
-# analise 1:
-
-library(dplyr)  
-analise1 <- novo_banco2 %>%
-  group_by(ano, StoreID) %>%
-  summarise(receita_total = sum(valor_real), .groups = "drop") %>%
-  group_by(ano) %>%
-  summarise(receita_media = mean(receita_total))
-view(analise1)
-
-library(dplyr)
-library(lubridate)
-library(readxl)
-
-dados <- "relatorio_old_town_road (1).xlsx"
-
-relatorio <- read_xlsx(dados, sheet = "relatorio_vendas")
-vendas <- read_xlsx(dados, sheet = "infos_vendas")
-produtos <- read_xlsx(dados, sheet = "infos_produtos")
-
-vendas <- vendas %>%
-  rename(SaleID = Sal3ID)
-
-produtos <- produtos %>%
-  rename(ItemID = Ite3ID)
-
-novo_banco <- left_join(produtos, vendas, by = "ItemID")
-novo_banco2 <- left_join(relatorio, novo_banco, by = "SaleID")
-
-novo_banco2 <- novo_banco2 %>%
-  mutate(
-    valor_real = UnityPrice * 5.31,                      
-    receita_venda = valor_real * Quantity,               
-    ano = year(Date)                                     
-  )
-
-analise1 <- novo_banco2 %>%
-  group_by(ano, StoreID) %>%
-  summarise(receita_total_loja = sum(receita_venda), .groups = "drop") %>%
-  group_by(ano) %>%
-  summarise(receita_media = mean(receita_total_loja))
-
-
-view(analise1)
-
-library(ggplot2)
-
-histograma <- ggplot(analise1, aes(x = ano, y = receita_media, group = 1)) +
-  geom_line(size = 1, colour = "#A11D21") +
-  geom_point(colour = "#A11D21", size = 2) +
-  labs(
-    x = "Ano",
-    y = "Receita média (R$)",
-    title = "Receita Média das Lojas (1880–1889)"
-  ) +
-  theme_classic() +
-  scale_x_continuous(breaks = 1880:1889)
-
-ggsave("receita_media_1880_1889_corrigida.pdf",
-       plot = histograma,
-       width = 158, height = 93, units = "mm")
-
-histograma
-
-
-# ---------------------------------------------------------------
-# ANÁLISE 2 - Relação entre peso e altura dos clientes
-# ---------------------------------------------------------------
-
-clientela <- clientes %>%
-  select(Cli3ntID, Name, Age, Sex, Weight_lbs, Height_dm) %>%
-  mutate(
-    Peso_kg = Weight_lbs * 0.453592,
-    Altura_cm = Height_dm * 10
-  )
-
-resumo_altura_peso <- clientela %>%
-  summarise(
-    media_peso = mean(Peso_kg, na.rm = TRUE),
-    desvio_peso = sd(Peso_kg, na.rm = TRUE),
-    media_altura = mean(Altura_cm, na.rm = TRUE),
-    desvio_altura = sd(Altura_cm, na.rm = TRUE)
-  )
-
-correlacao <- cor(clientela$Peso_kg, clientela$Altura_cm, use = "complete.obs")
-correlacao_formatado <- format(round(correlacao, 3), nsmall = 3)
-correlacao
-
-dispersao <- clientela %>%
-  ggplot(aes(x = Altura_cm, y = Peso_kg)) +
-  geom_point(colour = "#A11D21", size = 2.5, alpha = 0.6) +
-  labs(
-    x = "Altura (cm)",
-    y = "Peso (kg)",
-    title = "Relação entre Peso e Altura dos Clientes"
-  ) +
-  theme_classic() +
-  theme(
-    panel.grid.major = element_line(color = "grey90"),
-    panel.grid.minor = element_blank()
-  )
-
-ggsave("peso_altura_bivariado.pdf", dispersao, width = 158, height = 93, units = "mm")
-view(clientela)
-
-
-# ANÁLISE 3 - Idade dos clientes de Âmbar Seco a depender da loja (26/10)
-
-cidades <- cidades %>%
-  rename(CityID = C1tyID)
-
-clientes <- clientes %>%
-  rename(ClientID = Cli3ntID)
-
-banco_completo <- relatorio %>%
-  left_join(vendas, by = "SaleID") %>%
-  left_join(lojas, by = "StoreID") %>%
-  left_join(cidades, by = "CityID") %>%
-  left_join(clientes, by = "ClientID")
-
-clientes_ambar <- banco_completo %>%
-  filter(tolower(NameCity) == "âmbar seco" | tolower(NameCity) == "ambar seco") %>%
-  distinct(ClientID, .keep_all = TRUE) %>%
-  filter(!is.na(Age))
-
-box <- ggplot(clientes_ambar) +
-  aes(x = reorder(NameStore, Age, FUN = median), y = Age) +
-  geom_boxplot(fill = "#A11D21", width = 0.5) +
-  stat_summary(
-    fun = "mean",
-    geom = "point",
-    shape = 23,
-    size = 3,
-    fill = "white"
-  ) +
-  labs(
-    x = "Nome da Loja de Âmbar Seco",
-    y = "Idade dos Clientes (anos)"
-  ) +
-  theme_estat()
-
-
-ggsave(
-  "idade_clientes_ambar_boxplot.pdf",
-  plot = box,
-  width = 158,
-  height = 93,
-  units = "mm"
-)
-
-print(box)
-
-summary(clientes_ambar$Age)
-
-
-#ANALISE 4
-library(dplyr)
-library(ggplot2)
-library(forcats)
-library(stringr)
-
-receita_1889 <- novo_banco2 %>%
-  filter(ano == 1889) %>%
-  group_by(StoreID) %>%
-  summarise(receita_total = sum(receita_venda, na.rm = TRUE)) %>%
-  arrange(desc(receita_total))
-
-top3_lojas <- receita_1889 %>%
-  slice_max(order_by = receita_total, n = 3)
-
-dados_top3_lojas <- novo_banco2 %>%
-  filter(ano == 1889, StoreID %in% top3_lojas$StoreID)
-
-ranking_produtos <- dados_top3_lojas %>%
-  group_by(StoreID, ItemID, NameProduct) %>%
-  summarise(
-    quantidade_vendida = sum(Quantity, na.rm = TRUE),
-    receita_total = sum(receita_venda, na.rm = TRUE),
-    .groups = "drop"
-  )
-
-top3_produtos_por_loja <- ranking_produtos %>%
-  group_by(StoreID) %>%
-  slice_max(order_by = receita_total, n = 3)
-
-top3_final <- top3_produtos_por_loja %>%
-  left_join(lojas, by = "StoreID") %>%
-  select(
-    Loja = NameStore,
-    Produto = NameProduct,
-    Receita_Total = receita_total
-  )
-
-top3_final <- top3_final %>%
-  group_by(Loja) %>%
-  mutate(
-    perc_receita = round(Receita_Total / sum(Receita_Total) * 100, 1)
-  ) %>%
-  ungroup()
-
-top3_final <- top3_final %>%
-  mutate(
-    legenda = str_c(Produto, " (", perc_receita, "%)")
-  )
-
-grafico_top3 <- ggplot(top3_final, aes(
-  x = fct_reorder(Produto, Receita_Total, .desc = TRUE),
-  y = Receita_Total,
-  fill = Loja,
-  label = legenda
-)) +
-  geom_col(
-    position = position_dodge2(preserve = "single", padding = 0)
-  ) +
-  geom_text(
-    position = position_dodge(width = 0.9),
-    vjust = -0.5,
-    hjust = 0.5,
-    size = 3
-  ) +
-  labs(
-    x = "Produto",
-    y = "Receita Total (R$)"
-  ) +
-  scale_fill_manual(values = c("#A11D21", "#003366", "#CC9900")) +
-  theme_estat()
-
-ggsave(
-  "colunas-bi-freq-top3.pdf",
-  plot = grafico_top3,
-  width = 158,
-  height = 93,
-  units = "mm"
-)
-
-grafico_top3
-
 # Introdução
-O relatório foi desenvolvido pela Empresa Júnior de Estatística da Universidade de Brasília (ESTAT) a partir da solicitação de João Sábio, proprietário da Old Town Road Ltda, uma holding que atua no setor comercial do faroeste. O objetivo central deste projeto é fornecer análises estatísticas descritivas que auxiliem o cliente na compreensão do mercado em uma determinada região de interesse para novos investimentos.
-As análises foram elaboradas com base em um banco de dados fornecido pela empresa, contendo informações de clientes, lojas, produtos, vendas, cidades e funcionários. Entre as principais variáveis presentes estão: identificação das lojas e cidades, receitas anuais, peso e altura dos clientes, idade, sexo, além de dados sobre produtos e quantidades vendidas.
-Todo o processamento e análise dos dados foram realizados utilizando o software R, com o apoio dos pacotes do tidyverse, e a visualização interativa foi construída no Power BI, de modo a facilitar a exploração dos resultados e permitir uma interpretação mais dinâmica das informações.
-As seções seguintes deste relatório apresentam as análises solicitadas pelo cliente, abrangendo desde a receita média das lojas entre 1880 e 1889, até o perfil de clientes e produtos mais vendidos, de forma a oferecer uma visão ampla e estratégica sobre o desempenho comercial e o comportamento dos consumidores da região.
+
+Este relatório estatístico foi desenvolvido pela Empresa Júnior de Estatística da Universidade de Brasília (ESTAT), a partir da solicitação de João Sábio, proprietário da Old Town Road Ltda., uma holding que atua no setor comercial do faroeste. O objetivo principal do projeto é fornecer análises estatísticas descritivas que auxiliem a empresa na compreensão do mercado-alvo e na identificação de oportunidades de investimento em uma nova região de expansão comercial.
+
+O estudo busca analisar o desempenho das lojas e o perfil dos consumidores da Old Town Road Ltda., oferecendo uma visão quantitativa sobre os principais fatores que influenciam as vendas. Especificamente, o relatório apresenta quatro análises distintas: 
+(1) a receita média das lojas no período de 1880 a 1889; 
+(2) a relação entre altura e peso dos clientes; 
+(3) o perfil etário dos consumidores da cidade de Âmbar Seco;
+(4) a identificação dos produtos mais vendidos nas lojas com maior faturamento.
+
+Essas análises têm como propósito fornecer insumos estratégicos que apoiem a tomada de decisão do cliente, contribuindo para mitigar riscos de investimento, ajustar a oferta de produtos e serviços e maximizar o retorno financeiro da empresa na nova região.
+
+As informações utilizadas foram extraídas do arquivo “relatorio_old_town_road.xlsx”, disponibilizado pelo cliente. O conjunto de dados é estruturado em diversas planilhas temáticas, cada uma contendo informações essenciais para o entendimento das operações comerciais da holding:
+
+A planilha infos_clientes descreve o perfil demográfico e financeiro dos consumidores, incluindo as variáveis: ClientID (identificador do cliente), Name (nome), Age (idade, em anos), Sex (sexo), Height_dm (altura, em decímetros), Weight_lbs (peso, em libras) e Annual_Income_usd (renda anual, em dólares).
+
+As planilhas infos_cidades e infos_lojas apresentam a localização das vendas, associando cada loja (StoreID) a uma cidade (CityID) e a seu respectivo nome (NameCity).
+
+A planilha infos_funcionarios reúne dados referentes aos colaboradores, com variáveis como EmployeeID (identificador do funcionário) e EmployeeName (nome).
+
+A planilha infos_produtos contém informações sobre os produtos, incluindo ItemID (identificador do produto), NameProduct (nome do produto) e UnityPrice (preço unitário, em dólares).
+
+Por fim, as planilhas infos_vendas e relatorio_vendas registram as transações realizadas, permitindo a integração entre produtos, lojas e clientes. A relatorio_vendas relaciona o identificador da venda (SaleID) com o cliente (ClientID), a loja (StoreID), a data (Date) e a quantidade (Quantity), enquanto a infos_vendas conecta a SaleID ao ItemID, possibilitando uma análise completa do processo de venda.
+
+O processamento e a análise estatística dos dados foram realizados no software R, utilizando a versão 4.4.2, em conjunto com os pacotes do tidyverse, voltados para manipulação, transformação e visualização de dados. O trabalho foi conduzido no ambiente RStudio, que oferece uma interface integrada de desenvolvimento (IDE) e ferramentas para depuração, organização de código e geração de relatórios.
 
 # Referencial Teórico
+# Análise Descritiva Univariada
 
-A elaboração deste relatório fundamenta-se em princípios da Análise Estatística Descritiva, área da Estatística responsável por resumir, organizar e interpretar conjuntos de dados por meio de medidas numéricas, tabelas e representações gráficas. Esse tipo de abordagem permite compreender padrões, tendências e características gerais de uma população ou amostra, sem recorrer a inferências ou testes de hipóteses.
-Entre as principais ferramentas utilizadas na análise descritiva estão as medidas de tendência central, como média, mediana e moda , que resumem o comportamento típico dos dados, e as medidas de dispersão, como variância, desvio-padrão e amplitude , que indicam o grau de variabilidade presente nas observações. Além disso, foram utilizadas técnicas gráficas (como histogramas, boxplots e gráficos de barras) que possibilitam uma visualização intuitiva e comparativa dos resultados obtidos.
-As análises também consideraram relações entre variáveis numéricas, por meio de representações gráficas de dispersão, permitindo observar a possível existência de padrões de associação entre elas, como no caso da análise de peso e altura dos clientes.
-Para a execução das análises, foi utilizado o software R, amplamente empregado em pesquisas estatísticas e científicas, especialmente em conjunto com o pacote tidyverse, que oferece um ecossistema integrado para manipulação, limpeza e visualização de dados. A etapa de visualização interativa foi desenvolvida no Power BI, ferramenta que possibilita a construção de dashboards dinâmicos, permitindo ao cliente explorar diferentes filtros, períodos e categorias de forma acessível e visualmente informativa.
-Dessa forma, o referencial teórico que embasa este relatório apoia-se na estatística descritiva como instrumento para compreender e sintetizar informações de forma clara, contribuindo para a tomada de decisões estratégicas pela Old Town Road Ltda. a partir de uma leitura objetiva e visualmente rica dos dados.
+## Frequência Relativa
+
+A frequência relativa é utilizada para a comparação entre classes de uma variável categórica com $c$ categorias, ou para comparar uma mesma categoria em diferentes estudos.
+
+A frequência relativa da categoria $j$ é dada por:
+
+$$
+f_j=\frac{n_j}{n}
+$$
+
+Com:
+
+-   $j = 1, \, ..., \, c$
+
+-   $n_j =$ número de observações da categoria $j$
+
+-   $n =$ número total de observações
+
+Geralmente, a frequência relativa é utilizada em porcentagem, dada por:
+
+$$100 \times f_j$$
+Com:
+
+-   $i = 1, \, 2, \, ..., \, n$
+
+-   $n =$ número total de observações
+
+## Mediana
+
+Sejam as $n$ observações de um conjunto de dados $X=X_{(1)},X_{(2)},\ldots, X_{(n)}$ de determinada variável ordenadas de forma crescente. A mediana do conjunto de dados $X$ é o valor que deixa metade das observações abaixo dela e metade dos dados acima.
+
+Com isso, pode-se calcular a mediana da seguinte forma:
+
+$$
+med(X) =
+    \begin{cases}
+         X_{\frac{n+1}{2}}, \textrm{para n ímpar} \\
+         \frac{X_{\frac{n}{2}}+X_{\frac{n}{2} + 1}}{2}, \textrm{para n par} \\
+    \end{cases}
+$$
+
+## Quartis
+
+Os quartis são separatrizes que dividem o conjunto de dados em quatro partes iguais. O primeiro quartil (ou inferior) delimita os 25% menores valores, o segundo representa a mediana, e o terceiro delimita os 25% maiores valores. Inicialmente deve-se calcular a posição do quartil:
+
+-   Posição do primeiro quartil $P_1$: $$P_1=\frac{n+1}{4}$$
+
+-   Posição da mediana (segundo quartil) $P_2$: $$P_2 = \frac{n+1}{2}$$
+
+-   Posição do terceiro quartil $P_3$: $$P_3=\frac{3 \times (n+1)}{4}$$
+
+Com $n$ sendo o tamanho da amostra. Dessa forma, $X_{\left( P_i \right)}$ é o valor do $i$-ésimo quartil, onde $X_{\left( j \right)}$ representa a $j$-ésima observação dos dados ordenados.
+
+Se o cálculo da posição resultar em uma fração, deve-se fazer a média entre o valor que está na posição do inteiro anterior e do seguinte ao da posição.
+
+## Variância
+
+A variância é uma medida que avalia o quanto os dados estão dispersos em relação à média, em uma escala ao quadrado da escala dos dados.
+
+### Variância Populacional
+
+Para uma população, a variância é dada por:
+
+$$\sigma^2=\frac{\sum\limits_{i=1}^{N}\left(X_i - \mu\right)^2}{N}$$
+
+Com:
+
+-   $X_i =$ $i$-ésima observação da população
+
+-   $\mu =$ média populacional
+
+-   $N =$ tamanho da população
+
+### Variância Amostral
+
+Para uma amostra, a variância é dada por:
+
+$$S^2=\frac{\sum\limits_{i=1}^{n}\left(X_i - \bar{X}\right)^2}{n-1}$$
+
+Com:
+
+-   $X_i =$ i-ésima observação da amostra
+
+-   $\bar{X} =$ média amostral
+
+-   $n =$ tamanho da amostra
+
+## Desvio Padrão
+
+O desvio padrão é a raiz quadrada da variância. Ele avalia o quanto os dados estão dispersos em relação à média.
+
+### Desvio Padrão Populacional
+
+Para uma população, o desvio padrão é dado por:
+
+$$\sigma=\sqrt{\frac{\sum\limits_{i=1}^{N}\left(X_i - \mu\right)^2}{N}}$$
+
+Com:
+
+-   $X_i =$ i-ésima observação da população
+
+-   $\mu =$ média populacional
+
+-   $N =$ tamanho da população
+
+### Desvio Padrão Amostral
+
+Para uma amostra, o desvio padrão é dado por:
+
+$$S=\sqrt{\frac{\sum\limits_{i=1}^{n}\left(X_i - \bar{X}\right)^2}{n-1}}$$
+
+Com:
+
+-   $X_i =$ i-ésima observação da amostra
+
+-   $\bar{X} =$ média amostral
+
+-   $n =$ tamanho da amostra
+
+## Coeficiente de Variação
+
+O coeficiente de variação fornece a dispersão dos dados em relação à média. Quanto menor for o seu valor, mais homogêneos serão os dados. O coeficiente de variação é considerado baixo (apontando um conjunto de dados homogêneo) quando for menor ou igual a 25%. Ele é dado pela fórmula:
+
+$$C_V=\frac{S}{\bar{X}}\times 100$$
+
+Com:
+
+-   $S =$ desvio padrão amostral
+
+-   $\bar{X} =$ média amostral
+## Boxplot
+
+O boxplot é uma representação gráfica na qual se pode perceber de forma mais clara como os dados estão distribuídos. A figura abaixo ilustra um exemplo de boxplot.
+
+![Exemplo de boxplot](images/box_uni.png){fig-align="center"}
+
+A porção inferior do retângulo diz respeito ao primeiro quartil, enquanto a superior indica o terceiro quartil. Já o traço no interior do retângulo representa a mediana do conjunto de dados, ou seja, o valor em que o conjunto de dados é dividido em dois subconjuntos de mesmo tamanho. A média é representada pelo losango branco e os pontos são *outliers*. Os *outliers* são valores discrepantes da série de dados, ou seja, valores que não demonstram a realidade de um conjunto de dados.
+
+## Gráfico de Dispersão
+
+O gráfico de dispersão é uma representação gráfica utilizada para ilustrar o comportamento conjunto de duas variáveis quantitativas. A figura abaixo ilustra um exemplo de gráfico de dispersão, onde cada ponto representa uma observação do banco de dados.
+
+![Exemplo de Gráfico de Dispersão](images/disp_uni.png){fig-align="center"}
+
+## Tipos de Variáveis
+
+### Qualitativas
+
+As variáveis qualitativas são as variáveis não numéricas, que representam categorias ou características da população. Estas subdividem-se em:
+
+-   **Nominais**: quando não existe uma ordem entre as categorias da variável (exemplos: sexo, cor dos olhos, fumante ou não, etc)
+-   **Ordinais**: quando existe uma ordem entre as categorias da variável (exemplos: nível de escolaridade, mês, estágio de doença, etc)
+
+### Quantitativas
+
+As variáveis quantitativas são as variáveis numéricas, que representam características numéricas da população, ou seja, quantidades. Estas subdividem-se em:
+
+-   **Discretas**: quando os possíveis valores são enumeráveis (exemplos: número de filhos, número de cigarros fumados, etc)
+-   **Contínuas**: quando os possíveis valores são resultado de medições (exemplos: massa, altura, tempo, etc)
+
+## Coeficiente de Correlação de Pearson
+
+O coeficiente de correlação de Pearson é uma medida que verifica o grau de relação linear entre duas variáveis quantitativas. Este coeficiente varia entre os valores -1 e 1. O valor zero significa que não há relação linear entre as variáveis. Quando o valor do coeficiente $r$ é negativo, diz-se existir uma relação de grandeza inversamente proporcional entre as variáveis. Analogamente, quando $r$ é positivo, diz-se que as duas variáveis são diretamente proporcionais.
+
+O coeficiente de correlação de Pearson é normalmente representado pela letra $r$ e a sua fórmula de cálculo é:
+
+$$
+r_{Pearson} = \frac{\displaystyle \sum_{i=1}^{n} \left [ \left(x_i-\bar{x}\right) \left(y_i-\bar{y}\right) \right]}{\sqrt{\displaystyle \sum_{i=1}^{n} x_i^2 - n\bar{x}^2}  \times \sqrt{\displaystyle \sum_{i=1}^{n} y_i^2 - n\bar{y}^2}}
+$$
+Onde:
+
+-   $x_i =$ i-ésimo valor da variável $X$
+-   $y_i =$ i-ésimo valor da variável $Y$
+-   $\bar{x} =$ média dos valores da variável $X$
+-   $\bar{y} =$ média dos valores da variável $Y$
+
+Vale ressaltar que o coeficiente de Pearson é paramétrico e, portanto, sensível quanto à normalidade (simetria) dos dados.
+
+## Coeficiente de Correlação de Spearman
+
+O coeficiente de correlação de Spearman é uma medida não paramétrica que verifica, através de postos de variáveis quantitativas ou qualitativas ordinais, o grau de relação linear entre duas variáveis. Este coeficiente varia entre os valores -1 e 1. O valor zero significa que não há relação linear entre as variáveis. Quando o valor do coeficiente $\rho$ é negativo, diz-se existir uma relação de grandeza inversamente proporcional entre as variáveis. Analogamente, quando $\rho$ é positivo, diz-se que as duas variáveis são diretamente proporcionais.
+
+O coeficiente é calculado da seguinte maneira:
+
+$$
+\rho_{Spearman} = \frac{ \displaystyle \sum_{i=1}^{n}  \left[\left(R(x_i)-\frac{n+1}{2}\right)\left(R(y_i)-\frac{n+1}{2}\right)\right]}
+{\sqrt{\displaystyle \sum_{i=1}^{n}  \left(R(x_i)^2\right)-n\left(\frac{n+1}{2}\right)^{2}}  \times \sqrt{\displaystyle \sum_{i=1}^{n}  \left(R(y_i)^2 \right) -n\left(\frac{n+1}{2}\right)^{2}}}
+$$
+Onde:
+
+-   $x_i =$ i-ésimo valor da variável $X$
+-   $y_i =$ i-ésimo valor da variável $Y$
+-   $R(x_i) =$ posto relativo à observação $i$ de $X$
+-   $R(y_i) =$ posto relativo à observação $i$ de $Y$
+-   $n =$ número total de observações na amostra
 
 # Análises
 
-## Análise 1
+## Análise da Receita Média das lojas nos anos 1880 até 1889
+
 O objetivo dessa análise é avaliar a evolução da receita média das lojas da empresa Old Town Road ao longo do período de 1880 a 1889.
 A variável ano é quantitativa discreta, pois representa períodos temporais definidos, enquanto receita média (R$) é uma variável quantitativa contínua, expressando valores monetários.
 Esta é uma análise descritiva temporal, que busca observar tendências, variações e possíveis padrões de crescimento nas receitas ao longo do tempo.
@@ -341,12 +257,12 @@ Entre 1880 e 1884, observa-se um crescimento moderado, com pequenas oscilações
 O destaque está em 1889, onde ocorre um salto expressivo na receita média, possivelmente relacionado a eventos econômicos, abertura de novas lojas ou estratégias de mercado bem-sucedidas.
 Apesar de pequenas variações anuais, a tendência geral é positiva, refletindo crescimento sustentado ao longo da década de 1880.
 
-## Análise 2
+##  Análise da variação de peso por altura dos clientes
+
 O objetivo desta análise é compreender a relação entre o **peso (kg)** e a **altura (cm)** dos clientes da empresa **Old Town Road Ltda.**
-As variáveis analisadas são **quantitativas contínuas**, representando medidas físicas obtidas individualmente para cada cliente.
+As variáveis analisadas são quantitativas contínuas, representando medidas físicas obtidas individualmente para cada cliente.
 Trata-se de uma **análise descritiva bivariada**, cujo intuito é identificar padrões de associação e tendências de crescimento conjunto entre essas duas medidas corporais.
-O conjunto de dados contém `r n_clientes` observações únicas, sem duplicações.
-Antes da análise, as medidas foram convertidas para o **Sistema Internacional** (peso em quilogramas e altura em centímetros).
+Antes da análise, as medidas foram convertidas para o Sistema Internacional (peso em quilogramas e altura em centímetros).
 
 ```{r}
 #| label: dispersao
@@ -360,7 +276,8 @@ O coeficiente de correlação de Pearson, calculado como r = 0,6971007 correlaca
 Isso indica que clientes mais altos tendem, em média, a apresentar maior peso corporal — comportamento coerente com padrões biológicos e antropométricos.
 Embora existam variações individuais, possivelmente associadas a diferenças de constituição física, idade ou estilo de vida, o comportamento global aponta para uma relação consistente entre as variáveis analisadas.
 
-## Análise 3
+## Análise da idade dos clientes de Âmbar Seco de acordo com as lojas
+
 Com o intuito de compreender melhor o perfil etário dos clientes nas diferentes lojas da cidade de Âmbar Seco, optou-se pela utilização do gráfico boxplot (ou diagrama de caixa). Esse tipo de visualização é especialmente adequado para comparar distribuições de uma variável quantitativa, neste caso, a idade dos clientes, entre categorias distintas, como as diversas lojas analisadas.
 O boxplot permite observar, de forma sintética e objetiva, medidas de tendência central, dispersão e assimetria, além de identificar valores atípicos que podem indicar variações importantes no público atendido por cada loja.
 
@@ -370,26 +287,40 @@ O boxplot permite observar, de forma sintética e objetiva, medidas de tendênci
 box
 ```
 
-Com base no boxplot apresentado, a maior concentração de idades está entre 28 e 44 anos, o intervalo que compreende 50% dos clientes. A mediana (36 anos) e a média (37,48) são muito próximas — indicando simetria na distribuição (não há forte viés para jovens nem para idosos). Os outliers estão acima dos 60–65 anos, chegando até 80 anos.Isso mostra que, embora o público predominante seja adulto jovem e de meia-idade, há clientes mais idosos, possivelmente fiéis ou tradicionais na cidade.
+     Com base no boxplot apresentado, a maior concentração de idades está entre 28 e 44 anos, o intervalo que compreende 50% dos clientes. A mediana (36 anos) e a média (37,48) são muito próximas — indicando simetria na distribuição (não há forte viés para jovens nem para idosos). Os outliers estão acima dos 60–65 anos, chegando até 80 anos.Isso mostra que, embora o público predominante seja adulto jovem e de meia-idade, há clientes mais idosos, possivelmente fiéis ou tradicionais na cidade.
 
-## Análise 4
-O objetivo desta análise é identificar os três produtos mais vendidos nas três lojas com maior receita no ano de 1889, permitindo compreender quais itens impulsionaram o faturamento no período e quais estabelecimentos se destacaram em volume e desempenho de vendas.
-As variáveis envolvidas são:
-* Loja (qualitativa nominal) — representa cada estabelecimento;
-* Produto (qualitativa nominal) — identifica o item comercializado;
-* Quantidade vendida e receita total (quantitativas contínuas) — medem o desempenho das vendas.
-Essa é uma análise descritiva multivariada, voltada à avaliação do desempenho conjunto entre produtos e lojas, destacando a importância relativa de cada item dentro das unidades de maior faturamento no ano.
+## Análise dos top 3 produtos mais vendidos nas top 3 lojas com maior receita em 1889
+
+     O objetivo desta análise é identificar os três produtos mais vendidos nas três lojas com maior receita no ano de 1889, permitindo compreender quais itens impulsionaram o faturamento no período e quais estabelecimentos se destacaram em volume e desempenho de vendas.
+    As variáveis envolvidas são:
+    A loja (qualitativa nominal), representando cada estabelecimento, o produto (qualitativa nominal), identificando o item comercializado; a quantidade vendida e receita total (quantitativas contínuas), medindo desempenho das vendas, a partir desses dados, é obtido quanto cada loja faturou no ano de 1889. Como o preço estava em dólar, ele foi multiplicado por 5,31, considerando a cotação do dólar. 
+    Essa é uma análise descritiva multivariada, voltada à avaliação do desempenho conjunto entre produtos e lojas, destacando a importância relativa de cada item dentro das unidades de maior faturamento no ano.
 
 ```{r}
-#| label: top3_produtos
+#| label: bivariado
 #| fig-cap: "Top 3 produtos nas 3 lojas com maior receita em 1889"
-grafico_top3
+bivariado
 ```
-#Conclusões
+    A partir da visualização do gráfico, é possível identificar que cada estabelecimento possui um perfil distinto de destaque entre os itens vendidos.
 
-As análises conduzidas neste documento forneceram uma visão abrangente sobre o desempenho das lojas e o perfil dos clientes da Old Town Road Ltda., permitindo traduzir os dados disponíveis em informações estratégicas de valor para a tomada de decisão.
-O estudo da receita média entre 1880 e 1889 evidenciou um cenário de crescimento sustentado ao longo da década, refletindo um período de expansão econômica e amadurecimento operacional das lojas. Esse comportamento indica que a empresa consolidou sua presença no mercado e obteve ganhos consistentes em produtividade e volume de vendas.
-A análise bivariada entre peso e altura dos clientes demonstrou coerência e consistência nos dados coletados, com uma correlação positiva significativa. Tal resultado reforça a confiabilidade do banco de dados e mostra que as informações são adequadas para estudos futuros sobre perfil físico, comportamento do consumidor e segmentação de público.
-A análise etária dos clientes de Âmbar Seco revelou um público predominantemente composto por adultos jovens e de meia-idade, com uma distribuição equilibrada e presença de consumidores mais experientes, o que pode indicar fidelização de longo prazo e potencial para ações de marketing segmentadas por faixa etária.
-De modo geral, o projeto demonstra a importância da Estatística Descritiva como ferramenta de diagnóstico e suporte gerencial, fornecendo evidências objetivas que auxiliam o cliente na compreensão do cenário comercial e de consumo. A partir deste diagnóstico, a empresa tem subsídios concretos para aprimorar processos internos, planejar expansões e otimizar o desempenho operacional de suas unidades, consolidando-se de forma ainda mais sólida no mercado.
+    Na Loja Ouro Fino, o produto com maior número de vendas foi Botas de Couro, com 52 unidades vendidas, representando cerca de 13% do total da loja. Em seguida aparecem Whisky e Chapéu de Couro, com 49 e 45 vendas, correspondendo a 13% e 12% das vendas, respectivamente.
+
+    Na Loja TendTudo, observa-se predominância da Espingarda, com 53 vendas e participação de 16% nas vendas da loja. Logo atrás vêm Whisky (49 vendas, 15%) e Colt .45 (43 vendas, 13%), demonstrando uma demanda concentrada em itens de armamento e bebidas.
+
+    Por sua vez, na Ferraria Apache, o produto com maior saída foi o Chapéu de Couro, com 52 vendas (15%), seguido da Espingarda, com 42 vendas (12%), e dos itens Machado e Whisky, ambos com 41 vendas (12% cada).
+
+    De forma geral, percebe-se que produtos como Whisky, Espingarda e Chapéu de Couro aparecem entre os mais vendidos em mais de uma loja, o que sugere uma preferência ampla dos consumidores por bens de consumo recreativo e utilitários. A variedade dos itens mais procurados reforça que o desempenho comercial das lojas de maior receita está associado a uma diversificação equilibrada no portfólio de produtos, e não à dependência de um único item de destaque.
+    
+# Conclusões
+
+     Com base nas análises realizadas, conclui-se que a Old Town Road Ltda. atua em um mercado sólido e em expansão, caracterizado por um crescimento contínuo da receita média das lojas entre 1880 e 1889, com destaque para o aumento expressivo registrado em 1889. Esse comportamento reforça a existência de um ambiente econômico favorável aos investimentos, sustentado por uma base de consumidores consolidada e em constante ampliação, o que evidencia potencial para novas oportunidades comerciais na região.
+
+     A investigação da relação entre peso e altura dos clientes revelou uma forte correlação positiva (r = 0,697), o que confirma a consistência e qualidade dos dados coletados e reflete padrões antropométricos coerentes com a população analisada. Esse resultado oferece uma base confiável para futuras segmentações de mercado e permite previsões mais precisas sobre perfis e preferências de consumo.
+
+     No que se refere ao perfil etário dos clientes de Âmbar Seco, observou-se uma segmentação estratégica entre as lojas: Banco Careca e Vendinha Rápida atendem predominantemente um público adulto e estável, concentrado entre 30 e 45 anos, enquanto Ferraria Seca e Saloon se destacam por um público mais jovem e diversificado, a partir dos 15 anos. Essa diferença evidencia dois nichos de consumo bem definidos, que podem orientar estratégias de marketing direcionadas — desde ações de fidelização voltadas ao público maduro até campanhas de inovação voltadas ao público jovem.
+
+     A análise dos produtos mais vendidos nas lojas de maior receita em 1889 — Ouro Fino, TendTudo e Ferraria Apache — destacou que o sucesso financeiro dessas unidades não está vinculado a um único produto dominante, mas à diversificação equilibrada do portfólio. Embora Whisky, Espingarda e Chapéu de Couro tenham se repetido entre os itens mais vendidos, a variedade de produtos foi o principal fator impulsionador do faturamento, mostrando que a diversificação é essencial para a estabilidade e o crescimento das vendas.
+
+    De forma geral, os resultados indicam que a Old Town Road Ltda. está posicionada em um cenário altamente promissor para expansão e consolidação de mercado. A combinação de crescimento econômico sustentável, perfil demográfico definido e estratégias de diversificação bem-sucedidas cria um ambiente favorável à maximização de lucros e ao fortalecimento competitivo da empresa. Assim, recomenda-se que a holding mantenha o foco em políticas de diversificação de produtos, expansão geográfica planejada e ações de segmentação de público, aproveitando o potencial de crescimento identificado e consolidando sua presença como líder no comércio regional do faroeste.
+
 
