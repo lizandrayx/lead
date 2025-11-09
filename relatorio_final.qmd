@@ -269,6 +269,33 @@ Antes da análise, as medidas foram convertidas para o Sistema Internacional (pe
 #| fig-cap: "Gráfico de linhas da Receita Média da loja dos anos 1880 até 1889"
 dispersao
 ```
+```{=látex}
+""\begin{quadro}[H]
+	\setlength{	\tabcolsep}{9pt}
+	\renewcommand{	\arraystretch}{1.20}
+	\caption{Medidas resumo do peso (kg)}
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+	\begin{tabular} { | l |
+			S[table-format = 2.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 75,19 \\
+		Desvio Padrão & 11,92 \\
+		Variância & 142 \\
+		Mínimo & 45 \\
+		1º Quartil & 66,9 \\
+		Mediana & 75,3 \\
+		3º Quartil & 83,2 \\
+		Máximo & 119,3 \\
+	\hline
+	\end{tabular}
+	\label{quad:resumo_peso}
+	\end{adjustbox}
+\end{quadro}""
+```
 
 Conforme observado na Figura $\ref{fig-dispersao}$, os pontos seguem um padrão ascendente, sugerindo uma relação linear positiva entre peso e altura.
 À medida que a altura aumenta, o peso tende a crescer, refletindo a proporcionalidade esperada entre estatura e massa corporal.
@@ -286,7 +313,108 @@ O boxplot permite observar, de forma sintética e objetiva, medidas de tendênci
 #| fig-cap: "Idade dos clientes de Âmbar Seco a depender da loja"
 box
 ```
-
+```{=látex}
+"\begin{quadro}[H]
+	\setlength{	\tabcolsep}{9pt}
+	\renewcommand{	\arraystretch}{1.20}
+	\caption{Medidas resumo da idade - Banco Careca}
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+	\begin{tabular} { | l |
+			S[table-format = 1.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 34,92 \\
+		Desvio Padrão & 5,57 \\
+		Variância & 31,06 \\
+		Mínimo & 25 \\
+		1º Quartil & 31 \\
+		Mediana & 34 \\
+		3º Quartil & 40 \\
+		Máximo & 44 \\
+	\hline
+	\end{tabular}
+	\label{quad:idade_banco_careca}
+	\end{adjustbox}
+\end{quadro}
+		\begin{quadro}[H]
+	\setlength{	\tabcolsep}{9pt}
+	\renewcommand{	\arraystretch}{1.20}
+	\caption{Medidas resumo da idade - Vendinha Rápida}
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+	\begin{tabular} { | l |
+			S[table-format = 1.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 40,35 \\
+		Desvio Padrão & 6,03 \\
+		Variância & 36,39 \\
+		Mínimo & 30 \\
+		1º Quartil & 35 \\
+		Mediana & 41 \\
+		3º Quartil & 46 \\
+		Máximo & 49 \\
+	\hline
+	\end{tabular}
+	\label{quad:idade_vendinha_rapida}
+	\end{adjustbox}
+\end{quadro}
+		\begin{quadro}[H]
+	\setlength{	\tabcolsep}{9pt}
+	\renewcommand{	\arraystretch}{1.20}
+	\caption{Medidas resumo da idade - Saloon}
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+	\begin{tabular} { | l |
+			S[table-format = 2.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 34,2 \\
+		Desvio Padrão & 12,7 \\
+		Variância & 161,23 \\
+		Mínimo & 15 \\
+		1º Quartil & 26 \\
+		Mediana & 32,5 \\
+		3º Quartil & 38 \\
+		Máximo & 77 \\
+	\hline
+	\end{tabular}
+	\label{quad:idade_saloon}
+	\end{adjustbox}
+\end{quadro}
+		\begin{quadro}[H]
+	\setlength{	\tabcolsep}{9pt}
+	\renewcommand{	\arraystretch}{1.20}
+	\caption{Medidas resumo da idade - Ferraria Seca}
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+	\begin{tabular} { | l |
+			S[table-format = 2.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 33,67 \\
+		Desvio Padrão & 13,31 \\
+		Variância & 177,18 \\
+		Mínimo & 16 \\
+		1º Quartil & 24 \\
+		Mediana & 30,5 \\
+		3º Quartil & 39 \\
+		Máximo & 80 \\
+	\hline
+	\end{tabular}
+	\label{quad:idade_ferraria_seca}
+	\end{adjustbox}
+\end{quadro}"
+```
      Com base no boxplot apresentado, a maior concentração de idades está entre 28 e 44 anos, o intervalo que compreende 50% dos clientes. A mediana (36 anos) e a média (37,48) são muito próximas — indicando simetria na distribuição (não há forte viés para jovens nem para idosos). Os outliers estão acima dos 60–65 anos, chegando até 80 anos.Isso mostra que, embora o público predominante seja adulto jovem e de meia-idade, há clientes mais idosos, possivelmente fiéis ou tradicionais na cidade.
 
 ## Análise dos top 3 produtos mais vendidos nas top 3 lojas com maior receita em 1889
