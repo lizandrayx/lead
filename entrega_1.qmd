@@ -1,60 +1,315 @@
----
-# Nome do arquivo PDF gerado na pasta resultado
-output-file: "Entrega 1"
----
+source("rdocs/source/packages.R")
+setwd("C:/Users/lizan/OneDrive/Documentos/GitHub/lead")
 
-```{r setup}
-#| include: false
-source("rdocs/entrega_1.R")
-```
+# Define o arquivo principal de dados (com nome exato)
+dados <- "relatorio_old_town_road (1).xlsx"
 
-```{r}
-# Rodar apenas uma vez na vida!
-## Instalando o tinytex(pacote apenas)
-### CRAN version
-install.packages('tinytex')
+# Corrige o repositório (evita o aviso '404 Not Found')
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
 
 
-## Baixando o tinytex
-library(tinytex)
-tinytex::install_tinytex((force = TRUE))
-```
+# ---------------------------------------------------------------------------- #
 
-# Análises
+#        ______   _____  ________      ________ 
+#      |  ____| / ____| |__   __| /\  |__   __|
+#     | |__    | (___     | |   /  \    | |   
+#    |  __|    \___ \    | |  / /\ \   | |   
+#   | |____   ____) |   | |  /____ \  | |   
+#  |______   |_____/   |_| /_/    \_\|_|   
+#  
+#         Consultoria estatística 
+#
 
-## Análise 1
-O objetivo dessa análise é avaliar a evolução da receita média das lojas da empresa Old Town Road ao longo do período de 1880 a 1889.
-A variável ano é quantitativa discreta, pois representa períodos temporais definidos, enquanto receita média (R$) é uma variável quantitativa contínua, expressando valores monetários.
-Esta é uma análise descritiva temporal, que busca observar tendências, variações e possíveis padrões de crescimento nas receitas ao longo do tempo.
+# ---------------------------------------------------------------------------- #
+# ############################## README ###################################### #
+# Consultor, favor utilizar este arquivo .R para realizar TODAS as análises
+# alocadas a você neste projeto pelo gerente responsável, salvo instrução 
+# explícita do gerente para mudança.
+#
+# Escreva seu código da forma mais clara e legível possível, eliminando códigos
+# de teste depreciados, ou ao menos deixando como comentário. Dê preferência
+# as funções dos pacotes contidos no Tidyverse para realizar suas análises.
+# ---------------------------------------------------------------------------- #
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(readxl)
+library(forcats)
+library(stringr)
+
+dados <- ("relatorio_old_town_road (1).xlsx")
+relatorio <- read_xlsx(dados, sheet = "relatorio_vendas")
+vendas <- read_xlsx(dados, sheet = "infos_vendas") %>%
+  rename(SaleID = Sal3ID)
+produtos <- read_xlsx(dados, sheet = "infos_produtos") %>%
+  rename(ItemID= Ite3ID)
+funcionarios <- read_xlsx(dados, sheet = "infos_funcionarios")
+cidades <-  read_xlsx(dados, sheet = "infos_cidades")
+clientes <-  read_xlsx(dados, sheet = "infos_clientes")
+lojas <-  read_xlsx(dados, sheet = "infos_lojas")%>%
+  rename(StoreID = Stor3ID)
+
+novo_banco <- left_join(produtos, vendas, by= "ItemID")
+novo_banco2 <- left_join(relatorio, novo_banco, by= "SaleID")
+
+# analise 1:
+
+novo_banco2 <- novo_banco2 %>%
+  mutate(
+    valor_real = UnityPrice * 5.31,                      
+    receita_venda = valor_real * Quantity,               
+    ano = year(Date)                                     
+  )
+
+analise1 <- novo_banco2 %>%
+  group_by(ano, StoreID) %>%
+  summarise(receita_total_loja = sum(receita_venda), .groups = "drop") %>%
+  group_by(ano) %>%
+  summarise(receita_media = mean(receita_total_loja))
 
 
-```{r}
-#| label: fig-histograma
-#| fig-cap: "Gráfico de linhas da Receita Média da loja dos anos 1880 até 1889"
+view(analise1)
+
+histograma <- ggplot(analise1, aes(x = ano, y = receita_media, group = 1)) +
+  geom_line(size = 1, colour = "#A11D21") +
+  geom_point(colour = "#A11D21", size = 2) +
+  labs(
+    x = "Ano",
+    y = "Receita média (R$)") +
+  theme_classic() +
+  scale_x_continuous(breaks = 1880:1889)
+
+
 histograma
-```
 
-Com base no gráfico $\ref{fig-histograma}$ de linhas apresentado, analisa-se uma mudança significativa na receita média das lojas. 
-Entre 1880 e 1884, observa-se um crescimento moderado, com pequenas oscilações que sugerem  estabilidade nas vendas. A partir de 1885, há um aumento mais acentuado, indicando um período de expansão comercial ou aumento no volume de vendas.
-O destaque está em 1889, onde ocorre um salto expressivo na receita média, possivelmente relacionado a eventos econômicos, abertura de novas lojas ou estratégias de mercado bem-sucedidas.
-Apesar de pequenas variações anuais, a tendência geral é positiva, refletindo crescimento sustentado ao longo da década de 1880.
+library(knitr)
+install.packages("kableExtra")
+
+# Carrega pacotes
+library(knitr)
+library(kableExtra)
 
 
-##Análise 2
-O objetivo dessa análise é entender a relação entre o peso (em quilogramas) e altura (em
-centímetros) dos clientes da empresa Old Town Roa. A variável peso e altura são quantitativas contínuas, pois assumem valores numéricos dentro de um intervalo real, representando medidas físicas obtidas individualmente para cada cliente.
-Trata-se de uma análise descritiva bivariada, que busca investigar como essas duas variáveis se comportam em conjunto, observando se existe uma tendência de aumento ou diminuição simultânea.
+# ---------------------------------------------------------------
+# ANÁLISE 2 - Relação entre peso e altura dos clientes
+# ---------------------------------------------------------------
 
-```{r}
-#| label: dispersao
-#| fig-cap: "Gráfico de linhas da Receita Média da loja dos anos 1880 até 1889"
-dispersao
-```
+clientela <- clientes %>%
+  select(Cli3ntID, Name, Age, Sex, Weight_lbs, Height_dm) %>%
+  mutate(
+    Peso_kg = Weight_lbs * 0.453592,
+    Altura_cm = Height_dm * 10
+  )
 
-Com base no gráfico de dispersão $\ref{fig-dispersao}$, observa-se que os pontos formam um padrão ascendente, sugerindo uma relação linear positiva entre peso e altura.
-De modo geral, à medida que a altura aumenta, o peso também tende a aumentar, o que indica que indivíduos mais altos costumam apresentar maior massa corporal.
-Essa relação é consistente com padrões biológicos esperados, refletindo proporcionalidade entre estatura e peso.
-Embora existam pequenas variações individuais, possivelmente associadas a diferenças na constituição física ou estilo de vida, o comportamento geral demonstra uma tendência conjunta de crescimento, evidenciando correlação direta entre as variáveis analisadas.
-O coeficiente de correlação de Pearson obtido (r = 0,70) reforça essa relação linear positiva, indicando uma associação moderada a forte entre peso e altura.
-Isso confirma que indivíduos mais altos tendem a apresentar maior peso corporal, de forma coerente com padrões biológicos esperados.
+resumo_altura_peso <- clientela %>%
+  summarise(
+    media_peso = mean(Peso_kg, na.rm = TRUE),
+    desvio_peso = sd(Peso_kg, na.rm = TRUE),
+    media_altura = mean(Altura_cm, na.rm = TRUE),
+    desvio_altura = sd(Altura_cm, na.rm = TRUE)
+  )
 
+correlacao <- cor(clientela$Peso_kg, clientela$Altura_cm, use = "complete.obs")
+correlacao_formatado <- format(round(correlacao, 3), nsmall = 3)
+correlacao
+
+dispersao <- clientela %>%
+  ggplot(aes(x = Altura_cm, y = Peso_kg)) +
+  geom_point(colour = "#A11D21", size = 2.5, alpha = 0.6) +
+  labs(
+    x = "Altura (cm)",
+    y = "Peso (kg)"
+  ) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_line(color = "grey90"),
+    panel.grid.minor = element_blank()
+  )
+# ---------------------------------------------------------------
+# Tabelas resumo da altura e do peso (padronização ESTAT)
+# ---------------------------------------------------------------
+
+# Quadro 1: Medidas resumo da altura (cm)
+clientela |> 
+  print_quadro_resumo(
+    var_name = Altura_cm,
+    title = "Medidas resumo da altura (cm)",
+    label = "quad:resumo_altura"
+  )
+
+# Quadro 2: Medidas resumo do peso (kg)
+
+clientela |> 
+  print_quadro_resumo(
+    var_name = Peso_kg,
+    title = "Medidas resumo do peso (kg)",
+    label = "quad:resumo_peso"
+  )
+
+# ANÁLISE 3 - Idade dos clientes de Âmbar Seco a depender da loja (26/10)
+
+cidades <- cidades %>%
+  rename(CityID = C1tyID)
+
+clientes <- clientes %>%
+  rename(ClientID = Cli3ntID)
+
+banco_completo <- relatorio %>%
+  left_join(vendas, by = "SaleID") %>%
+  left_join(lojas, by = "StoreID") %>%
+  left_join(cidades, by = "CityID") %>%
+  left_join(clientes, by = "ClientID")
+
+clientes_ambar <- banco_completo %>%
+  filter(tolower(NameCity) == "âmbar seco" | tolower(NameCity) == "ambar seco") %>%
+  distinct(ClientID, .keep_all = TRUE) %>%
+  filter(!is.na(Age))
+
+box <- ggplot(clientes_ambar) +
+  aes(x = reorder(NameStore, Age, FUN = median), y = Age) +
+  geom_boxplot(fill = "#A11D21", width = 0.5) +
+  stat_summary(
+    fun = "mean",
+    geom = "point",
+    shape = 23,
+    size = 3,
+    fill = "white"
+  ) +
+  labs(
+    x = "Nome da Loja de Âmbar Seco",
+    y = "Idade dos Clientes (anos)"
+  ) +
+  theme_estat()
+
+print(box)
+
+summary(clientes_ambar$Age)
+
+# ---------------------------------------------------------------
+# FAZER tabelas resumo da idade dos clientes por loja (padronização ESTAT)
+# ---------------------------------------------------------------
+
+clientes_ambar %>%
+  filter(NameStore == "Banco Careca") %>%
+  print_quadro_resumo(
+    var_name = Age,
+    title = "Medidas resumo da idade - Banco Careca",
+    label = "quad:idade_banco_careca"
+  )
+
+clientes_ambar %>%
+  filter(NameStore == "Vendinha Rápida") %>%
+  print_quadro_resumo(
+    var_name = Age,
+    title = "Medidas resumo da idade - Vendinha Rápida",
+    label = "quad:idade_vendinha_rapida"
+  )
+
+clientes_ambar %>%
+  filter(NameStore == "Saloon") %>%
+  print_quadro_resumo(
+    var_name = Age,
+    title = "Medidas resumo da idade - Saloon",
+    label = "quad:idade_saloon"
+  )
+
+clientes_ambar %>%
+  filter(NameStore == "Ferraria Seca") %>%
+  print_quadro_resumo(
+    var_name = Age,
+    title = "Medidas resumo da idade - Ferraria Seca",
+    label = "quad:idade_ferraria_seca"
+  )
+
+
+#ANALISE 4
+
+# === 1. Filtra o banco para o ano de 1889 ===
+lojas4 <- banco %>%
+  mutate(Ano = year(Date)) %>%
+  filter(Ano == 1889) %>%
+  group_by(NameProduct, NameStore) %>%
+  summarise(quantidade_total_vendida = sum(Quantity), .groups = "drop") %>%
+  # === 2. Filtra as 3 lojas com maior receita (fixas no enunciado) ===
+  filter(NameStore %in% c("Loja Ouro Fino", "Loja TendTudo", "Ferraria Apache")) %>%
+  group_by(NameStore) %>%
+  mutate(
+    freq_relativa = round(quantidade_total_vendida / sum(quantidade_total_vendida) * 100, 1)
+  ) %>%
+  slice_max(order_by = quantidade_total_vendida, n = 3) %>%
+  ungroup()
+
+# === 3. Renomeia colunas no padrão da ESTAT ===
+lojas4 <- lojas4 %>%
+  rename(Nome_do_Produto = NameProduct)
+
+# === 4. Cria legendas com quantidade + percentual ===
+porcentagens <- str_c(lojas4$freq_relativa, "%") %>%
+  str_replace("\\.", ",")
+
+legendas <- str_squish(str_c(lojas4$quantidade_total_vendida, " (", porcentagens, ")"))
+
+# === 5. Faz o gráfico bivariado padronizado ===
+bivariado <- ggplot(lojas4) +
+  aes(
+    x = fct_reorder(NameStore, quantidade_total_vendida, .desc = TRUE),
+    y = quantidade_total_vendida,
+    fill = Nome_do_Produto,
+    label = legendas
+  ) +
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) +
+  labs(
+    x = "Loja",
+    y = "Frequência"
+  ) +
+  theme_estat()
+
+ggsave("colunas-bi-freq.pdf", width = 158, height = 93, units = "mm")
+ view(bivariado)
+
+ porcentagens <- str_c(lojas4$freq_relativa, "%") %>%
+   str_replace("\\.", ",")
+ 
+ legendas <- str_squish(str_c(lojas4$quantidade_total_vendida, " (", porcentagens, ")"))
+ ggsave("colunas-bi-freq.pdf", width = 158, height = 93, units = "mm")
+ 
+ # === Cálculo do total vendido por loja para ordenar ===
+ ordem_lojas <- lojas4 %>%
+   group_by(NameStore) %>%
+   summarise(total_loja = sum(quantidade_total_vendida)) %>%
+   arrange(desc(total_loja)) %>%
+   pull(NameStore)
+ 
+ # === Gráfico padronizado com ordenação ===
+ porcentagens <- str_c(lojas4$freq_relativa, "%") %>%
+   str_replace("\\.", ",")
+ 
+ legendas <- str_squish(str_c(lojas4$quantidade_total_vendida, " (", porcentagens, ")"))
+ 
+ ggplot(lojas4) +
+   aes(
+     x = factor(NameStore, levels = ordem_lojas),  # ordena pelo total vendido
+     y = quantidade_total_vendida,
+     fill = Nome_do_Produto,
+     label = legendas
+   ) +
+   geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+   geom_text(
+     position = position_dodge(width = .9),
+     vjust = -0.5, hjust = 0.5,
+     size = 2.3
+   ) +
+   labs(
+     x = "Loja",
+     y = "Frequência"
+   ) +
+   theme_estat()
+ 
+ ggsave("colunas-bi-freq.pdf", width = 158, height = 93, units = "mm")
+ 
+ 
