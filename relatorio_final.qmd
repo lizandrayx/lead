@@ -296,6 +296,33 @@ dispersao
 	\end{adjustbox}
 \end{quadro}""
 ```
+```{=látex}
+\begin{quadro}[H]
+	\setlength{	\tabcolsep}{9pt}
+	\renewcommand{	\arraystretch}{1.20}
+	\caption{Medidas resumo da altura (cm)}
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+	\begin{tabular} { | l |
+			S[table-format = 1.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 171,48 \\
+		Desvio Padrão & 9,87 \\
+		Variância & 97,38 \\
+		Mínimo & 150 \\
+		1º Quartil & 164,8 \\
+		Mediana & 171,75 \\
+		3º Quartil & 178 \\
+		Máximo & 200 \\
+	\hline
+	\end{tabular}
+	\label{quad:resumo_altura}
+	\end{adjustbox}
+\end{quadro}
+```
 
 Conforme observado na Figura $\ref{fig-dispersao}$, os pontos seguem um padrão ascendente, sugerindo uma relação linear positiva entre peso e altura.
 À medida que a altura aumenta, o peso tende a crescer, refletindo a proporcionalidade esperada entre estatura e massa corporal.
