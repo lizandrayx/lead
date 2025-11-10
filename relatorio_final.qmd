@@ -1,7 +1,7 @@
 ---
-title: "Análise Estatística da Old Town Road Ltda."
+title: "Relatório de Pesquisa de Mercado da Old Town Road Ltda."
 header-includes:
-  - \authors{Lizandra}
+  - \authors{Lizandra Rodrigues dos Santos}
   - \client{Old Road Town}
 # Nome do documento PDF gerado
 output-file: "Projeto_Old_Town_Road_Liz"
@@ -245,6 +245,11 @@ Onde:
 O objetivo dessa análise é avaliar a evolução da receita média das lojas da empresa Old Town Road ao longo do período de 1880 a 1889.
 A variável ano é quantitativa discreta, pois representa períodos temporais definidos, enquanto receita média (R$) é uma variável quantitativa contínua, expressando valores monetários.
 Esta é uma análise descritiva temporal, que busca observar tendências, variações e possíveis padrões de crescimento nas receitas ao longo do tempo.
+O cálculo da receita média das lojas foi realizado a partir da integração das planilhas relatorio_vendas, infos_vendas e infos_produtos, por meio do software R e utilizando os pacotes do tidyverse.
+Inicialmente, as bases de dados foram unificadas pela variável identificadora das vendas (SaleID), o que possibilitou relacionar cada transação ao produto correspondente e ao seu preço unitário. Em seguida, foi criada a variável valor_real, responsável pela conversão dos preços originais, expressos em dólar, para reais, considerando a taxa de câmbio de 1 dólar equivalente a 5,31 reais.
+Com base nessa conversão, foi determinada a receita total de cada venda, obtida pelo produto entre o preço unitário (em reais) e a quantidade vendida. Assim, cada observação passou a representar o valor total movimentado em reais por venda registrada no período analisado. Posteriormente, a variável Date foi utilizada para extrair o ano correspondente a cada transação, abrangendo o intervalo de 1880 a 1889. Para cada ano, somou-se a receita total de todas as lojas, e em seguida, calculou-se a média das receitas anuais, dividindo-se o total obtido pelo número de lojas ativas naquele ano.
+Esse procedimento resultou na receita média anual por loja, expressa em reais, permitindo avaliar a variação do desempenho médio das unidades comerciais ao longo da década analisada.
+A presente análise contempla 18 estabelecimentos comerciais pertencentes à holding Old Town Road Ltda., distribuídos em cinco cidades da região de atuação da empresa. Essas unidades representam a totalidade das lojas em operação no período de 1880 a 1889, abrangendo diferentes perfis de atividade econômica. O conjunto de dados utilizado integra o registro completo das transações realizadas ao longo de dez anos consecutivos, totalizando milhares de observações individuais. Cada transação está devidamente identificada pela variável SaleID, a qual estabelece a ligação entre as informações de data, loja, cliente, produto, preço unitário e quantidade vendida. Essa estruturação detalhada do banco de dados assegura a abrangência e a representatividade estatística da amostra, possibilitando uma análise consistente da evolução da receita média das lojas ao longo da década estudada.
 
 ```{r}
 #| label: fig-histograma
@@ -254,15 +259,18 @@ histograma
 
 Com base no gráfico $\ref{fig-histograma}$ de linhas apresentado, analisa-se uma mudança significativa na receita média das lojas.
 Entre 1880 e 1884, observa-se um crescimento moderado, com pequenas oscilações que sugerem  estabilidade nas vendas. A partir de 1885, há um aumento mais acentuado, indicando um período de expansão comercial ou aumento no volume de vendas.
-O destaque está em 1889, onde ocorre um salto expressivo na receita média, possivelmente relacionado a eventos econômicos, abertura de novas lojas ou estratégias de mercado bem-sucedidas.
-Apesar de pequenas variações anuais, a tendência geral é positiva, refletindo crescimento sustentado ao longo da década de 1880.
+Destaca-se, sobretudo, o intervalo entre 1888 e 1889, no qual ocorre o maior salto na receita média de toda a série temporal. Esse avanço expressivo reflete uma aceleração no desempenho financeiro da empresa, possivelmente decorrente de fatores como o aumento da demanda, abertura de novas lojas ou estratégias comerciais mais eficazes. O resultado obtido em 1889 consolida a Old Town Road Ltda. em um patamar superior de faturamento médio, reforçando o cenário de crescimento sustentado e fortalecimento econômico ao final da década analisada.
 
+ 
 ##  Análise da variação de peso por altura dos clientes
 
 O objetivo desta análise é compreender a relação entre o **peso (kg)** e a **altura (cm)** dos clientes da empresa **Old Town Road Ltda.**
 As variáveis analisadas são quantitativas contínuas, representando medidas físicas obtidas individualmente para cada cliente.
 Trata-se de uma **análise descritiva bivariada**, cujo intuito é identificar padrões de associação e tendências de crescimento conjunto entre essas duas medidas corporais.
 Antes da análise, as medidas foram convertidas para o Sistema Internacional (peso em quilogramas e altura em centímetros).
+A amostra analisada é composta por 1.990 clientes, número que garante representatividade e confiabilidade estatística aos resultados obtidos.
+Os quadros de medidas resumo apresentados a seguir mostram que os clientes possuem, em média, 75,19 kg de peso, com desvio padrão de 11,92 kg, indicando moderada variabilidade entre os indivíduos. O peso mínimo observado é de 45 kg, enquanto o máximo chega a 119,3 kg, refletindo uma amplitude total de 74,3 kg.
+No caso da altura, a média registrada é de 171,48 cm, com desvio padrão de 9,87 cm, evidenciando dispersão relativamente baixa — ou seja, a maior parte dos clientes possui altura próxima à média. A amplitude total vai de 150 cm a 200 cm, revelando uma variação moderada entre os indivíduos analisados.
 
 ```{r}
 #| label: dispersao
@@ -323,126 +331,55 @@ dispersao
 	\end{adjustbox}
 \end{quadro}
 ```
-
-Conforme observado na Figura $\ref{fig-dispersao}$, os pontos seguem um padrão ascendente, sugerindo uma relação linear positiva entre peso e altura.
-À medida que a altura aumenta, o peso tende a crescer, refletindo a proporcionalidade esperada entre estatura e massa corporal.
-O coeficiente de correlação de Pearson, calculado como r = 0,6971007 correlacao_formatado, confirma essa relação com uma associação positiva moderada a forte.
-Isso indica que clientes mais altos tendem, em média, a apresentar maior peso corporal — comportamento coerente com padrões biológicos e antropométricos.
-Embora existam variações individuais, possivelmente associadas a diferenças de constituição física, idade ou estilo de vida, o comportamento global aponta para uma relação consistente entre as variáveis analisadas.
+Conforme observado na Figura $\ref{fig-dispersao}$, os pontos seguem um padrão ascendente, sugerindo uma relação linear positiva entre peso e altura. À medida que a altura aumenta, o peso tende a crescer, refletindo a proporcionalidade esperada entre estatura e massa corporal.
+O coeficiente de correlação de Pearson (r = 0,697) confirma essa relação, indicando uma associação linear positiva moderada a forte. Isso significa que, embora a relação não seja perfeita, existe uma tendência clara de que clientes mais altos apresentem, em média, maior peso corporal. O valor positivo de r demonstra que as variáveis evoluem na mesma direção: quando uma aumenta, a outra tende a aumentar também.
+Em termos práticos, esse resultado está de acordo com padrões biológicos e antropométricos, que relacionam o crescimento da altura com o aumento natural da massa corporal. Pequenas variações individuais podem ser atribuídas a fatores como constituição física, idade, alimentação e estilo de vida. Ainda assim, o conjunto dos dados evidencia uma relação consistente e estatisticamente coerente entre as variáveis analisadas, reforçando a qualidade e a confiabilidade das informações coletadas.
 
 ## Análise da idade dos clientes de Âmbar Seco de acordo com as lojas
-
-Com o intuito de compreender melhor o perfil etário dos clientes nas diferentes lojas da cidade de Âmbar Seco, optou-se pela utilização do gráfico boxplot (ou diagrama de caixa). Esse tipo de visualização é especialmente adequado para comparar distribuições de uma variável quantitativa, neste caso, a idade dos clientes, entre categorias distintas, como as diversas lojas analisadas.
-O boxplot permite observar, de forma sintética e objetiva, medidas de tendência central, dispersão e assimetria, além de identificar valores atípicos que podem indicar variações importantes no público atendido por cada loja.
-
+Com o intuito de compreender melhor o perfil etário dos clientes nas diferentes lojas da cidade de Âmbar Seco, optou-se pela utilização do gráfico boxplot (ou diagrama de caixa). Esse tipo de visualização é especialmente adequado para comparar distribuições de uma variável quantitativa contínua, neste caso, a idade dos clientes, entre categorias distintas, representadas pelas lojas, que constituem uma variável qualitativa nominal.
+Foram analisadas quatro lojas — Banco Careca, Vendinha Rápida, Saloon e Ferraria Seca — totalizando n clientes cadastrados nessa cidade (substituir pelo valor obtido com nrow(clientes_ambar)). Essa amostra abrange todo o público da Old Town Road Ltda. na localidade, garantindo representatividade para a análise.
+    O boxplot permite observar, de forma sintética e objetiva, as medidas de tendência central (média e mediana), dispersão (amplitude e desvio padrão) e assimetria, além de identificar valores atípicos (outliers) que indicam variações relevantes entre os perfis de consumidores atendidos por cada loja.
+Os quadros de medidas resumo demonstram que o Banco Careca e a Vendinha Rápida concentram clientes de faixa etária mais elevada, com médias de 34,92 e 40,35 anos e baixa variabilidade (desvios padrão de 5,57 e 6,03). Esses resultados sugerem um público adulto consolidado e homogêneo, com menor presença de extremos de idade.
+Em contrapartida, as lojas Saloon e Ferraria Seca apresentam maior dispersão etária, com médias de 34,2 e 33,67 anos e desvios padrão de 12,7 e 13,31, respectivamente. A presença de idades mínimas entre 15 e 16 anos e máximas próximas a 80 anos indica que esses estabelecimentos atraem um público mais diversificado, abrangendo desde jovens até clientes mais idosos.
 ```{r}
 #| label: box
 #| fig-cap: "Idade dos clientes de Âmbar Seco a depender da loja"
 box
 ```
 ```{=látex}
-"\begin{quadro}[H]
-	\setlength{	\tabcolsep}{9pt}
-	\renewcommand{	\arraystretch}{1.20}
-	\caption{Medidas resumo da idade - Banco Careca}
-	\centering
-	\begin{adjustbox}{max width=\textwidth}
-	\begin{tabular} { | l |
-			S[table-format = 1.2]
-			|}
-	\hline
-		\textbf{Estatística} & \textbf{Valor} \\
-		\hline
-		Média & 34,92 \\
-		Desvio Padrão & 5,57 \\
-		Variância & 31,06 \\
-		Mínimo & 25 \\
-		1º Quartil & 31 \\
-		Mediana & 34 \\
-		3º Quartil & 40 \\
-		Máximo & 44 \\
-	\hline
-	\end{tabular}
-	\label{quad:idade_banco_careca}
-	\end{adjustbox}
+\begin{quadro}[H]
+\setlength{\tabcolsep}{7pt}
+\renewcommand{\arraystretch}{1.20}
+\caption{Medidas resumo da idade dos clientes por loja - Âmbar Seco}
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{|l|
+S[table-format=2.2]
+S[table-format=2.2]
+S[table-format=2.2]
+S[table-format=2.2]|
+}
+\hline
+\textbf{Estatística} & \textbf{Banco Careca} & \textbf{Vendinha Rápida} & \textbf{Saloon} & \textbf{Ferraria Seca} \
+\hline
+Média & 34,92 & 40,35 & 34,20 & 33,67 \
+Desvio Padrão & 5,57 & 6,03 & 12,70 & 13,31 \
+Variância & 31,06 & 36,39 & 161,23 & 177,18 \
+Mínimo & 25 & 30 & 15 & 16 \
+1º Quartil & 31 & 35 & 26 & 24 \
+Mediana & 34 & 41 & 32,5 & 30,5 \
+3º Quartil & 40 & 46 & 38 & 39 \
+Máximo & 44 & 49 & 77 & 80 \
+\hline
+\end{tabular}
+\label{quad:idade_lojas_ambar}
+\end{adjustbox}
 \end{quadro}
-		\begin{quadro}[H]
-	\setlength{	\tabcolsep}{9pt}
-	\renewcommand{	\arraystretch}{1.20}
-	\caption{Medidas resumo da idade - Vendinha Rápida}
-	\centering
-	\begin{adjustbox}{max width=\textwidth}
-	\begin{tabular} { | l |
-			S[table-format = 1.2]
-			|}
-	\hline
-		\textbf{Estatística} & \textbf{Valor} \\
-		\hline
-		Média & 40,35 \\
-		Desvio Padrão & 6,03 \\
-		Variância & 36,39 \\
-		Mínimo & 30 \\
-		1º Quartil & 35 \\
-		Mediana & 41 \\
-		3º Quartil & 46 \\
-		Máximo & 49 \\
-	\hline
-	\end{tabular}
-	\label{quad:idade_vendinha_rapida}
-	\end{adjustbox}
-\end{quadro}
-		\begin{quadro}[H]
-	\setlength{	\tabcolsep}{9pt}
-	\renewcommand{	\arraystretch}{1.20}
-	\caption{Medidas resumo da idade - Saloon}
-	\centering
-	\begin{adjustbox}{max width=\textwidth}
-	\begin{tabular} { | l |
-			S[table-format = 2.2]
-			|}
-	\hline
-		\textbf{Estatística} & \textbf{Valor} \\
-		\hline
-		Média & 34,2 \\
-		Desvio Padrão & 12,7 \\
-		Variância & 161,23 \\
-		Mínimo & 15 \\
-		1º Quartil & 26 \\
-		Mediana & 32,5 \\
-		3º Quartil & 38 \\
-		Máximo & 77 \\
-	\hline
-	\end{tabular}
-	\label{quad:idade_saloon}
-	\end{adjustbox}
-\end{quadro}
-		\begin{quadro}[H]
-	\setlength{	\tabcolsep}{9pt}
-	\renewcommand{	\arraystretch}{1.20}
-	\caption{Medidas resumo da idade - Ferraria Seca}
-	\centering
-	\begin{adjustbox}{max width=\textwidth}
-	\begin{tabular} { | l |
-			S[table-format = 2.2]
-			|}
-	\hline
-		\textbf{Estatística} & \textbf{Valor} \\
-		\hline
-		Média & 33,67 \\
-		Desvio Padrão & 13,31 \\
-		Variância & 177,18 \\
-		Mínimo & 16 \\
-		1º Quartil & 24 \\
-		Mediana & 30,5 \\
-		3º Quartil & 39 \\
-		Máximo & 80 \\
-	\hline
-	\end{tabular}
-	\label{quad:idade_ferraria_seca}
-	\end{adjustbox}
-\end{quadro}"
 ```
-     Com base no boxplot apresentado, a maior concentração de idades está entre 28 e 44 anos, o intervalo que compreende 50% dos clientes. A mediana (36 anos) e a média (37,48) são muito próximas — indicando simetria na distribuição (não há forte viés para jovens nem para idosos). Os outliers estão acima dos 60–65 anos, chegando até 80 anos.Isso mostra que, embora o público predominante seja adulto jovem e de meia-idade, há clientes mais idosos, possivelmente fiéis ou tradicionais na cidade.
+
+Com base no boxplot apresentado, a maior concentração de idades encontra-se entre 28 e 44 anos, intervalo que representa cerca de 50% dos clientes. A proximidade entre a média (37,48 anos) e a mediana (36 anos) sugere simetria na distribuição, sem predominância significativa de grupos mais jovens ou mais velhos. Os outliers, localizados acima dos 60 anos, reforçam a presença de clientes tradicionais e fiéis, possivelmente vinculados historicamente às lojas da cidade.
+
+De modo geral, conclui-se que a cidade de Âmbar Seco apresenta dois perfis etários predominantes: um público adulto consolidado, majoritário no Banco Careca e na Vendinha Rápida, e um público mais heterogêneo, com maior participação de jovens e adultos, observado no Saloon e na Ferraria Seca. Essa diferenciação sugere segmentações de mercado distintas entre as lojas e pode orientar estratégias específicas de fidelização e comunicação com o cliente.
 
 ## Análise dos top 3 produtos mais vendidos nas top 3 lojas com maior receita em 1889
 
@@ -450,6 +387,8 @@ box
     As variáveis envolvidas são:
     A loja (qualitativa nominal), representando cada estabelecimento, o produto (qualitativa nominal), identificando o item comercializado; a quantidade vendida e receita total (quantitativas contínuas), medindo desempenho das vendas, a partir desses dados, é obtido quanto cada loja faturou no ano de 1889. Como o preço estava em dólar, ele foi multiplicado por 5,31, considerando a cotação do dólar. 
     Essa é uma análise descritiva multivariada, voltada à avaliação do desempenho conjunto entre produtos e lojas, destacando a importância relativa de cada item dentro das unidades de maior faturamento no ano.
+    A presente análise refere-se exclusivamente às três lojas com maior receita no ano de 1889, selecionadas a partir do faturamento total registrado nesse período. Dessa forma, os resultados apresentados não representam a totalidade das unidades da Old Town Road Ltda., mas sim o desempenho concentrado das lojas de maior relevância econômica no intervalo analisado, possibilitando uma avaliação mais precisa dos produtos que mais contribuíram para o lucro da empresa nesse ano.
+    O gráfico utilizado é do tipo colunas bivariado, elaborado com o objetivo de comparar simultaneamente duas variáveis — a quantidade de produtos vendidos e as lojas correspondentes. Essa representação permite observar, de forma clara e objetiva, as diferenças de desempenho entre os produtos mais vendidos em cada uma das lojas, destacando visualmente os itens que mais influenciaram o faturamento de cada estabelecimento.
 
 ```{r}
 #| label: bivariado
