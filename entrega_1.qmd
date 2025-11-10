@@ -1,21 +1,20 @@
 source("rdocs/source/packages.R")
-setwd("C:/Users/lizan/OneDrive/Documentos/GitHub/lead")
 
 # Define o arquivo principal de dados (com nome exato)
-dados <- "relatorio_old_town_road (1).xlsx"
+dados <- "relatorio_old_town_road.xlsx"
 
 # Corrige o repositório (evita o aviso '404 Not Found')
-options(repos = c(CRAN = "https://cran.rstudio.com/"))
+
 
 
 # ---------------------------------------------------------------------------- #
 
-#        ______   _____  ________      ________ 
-#      |  ____| / ____| |__   __| /\  |__   __|
-#     | |__    | (___     | |   /  \    | |   
-#    |  __|    \___ \    | |  / /\ \   | |   
-#   | |____   ____) |   | |  /____ \  | |   
-#  |______   |_____/   |_| /_/    \_\|_|   
+#        __   __  ___      ____ 
+#      |  _| / __| |_   _| /\  |_   __|
+#     | |_    | (__     | |   /  \    | |   
+#    |  _|    \__ \    | |  / /\ \   | |   
+#   | |__   _) |   | |  /_ \  | |   
+#  |__   |__/   || //    \\|_|   
 #  
 #         Consultoria estatística 
 #
@@ -37,17 +36,26 @@ library(readxl)
 library(forcats)
 library(stringr)
 
-dados <- ("relatorio_old_town_road (1).xlsx")
+dados <- ("relatorio_old_town_road.xlsx")
 relatorio <- read_xlsx(dados, sheet = "relatorio_vendas")
 vendas <- read_xlsx(dados, sheet = "infos_vendas") %>%
   rename(SaleID = Sal3ID)
 produtos <- read_xlsx(dados, sheet = "infos_produtos") %>%
   rename(ItemID= Ite3ID)
 funcionarios <- read_xlsx(dados, sheet = "infos_funcionarios")
-cidades <-  read_xlsx(dados, sheet = "infos_cidades")
-clientes <-  read_xlsx(dados, sheet = "infos_clientes")
+cidades <-  read_xlsx(dados, sheet = "infos_cidades")%>%
+  rename(CityID=C1tyID)
+clientes <-  read_xlsx(dados, sheet = "infos_clientes")%>%
+  rename(ClientID=Cli3ntID)
 lojas <-  read_xlsx(dados, sheet = "infos_lojas")%>%
   rename(StoreID = Stor3ID)
+
+banco <- relatorio %>%
+  full_join(vendas, by = "SaleID") %>%
+  full_join(produtos, by= "ItemID")%>%
+  full_join(lojas, by = "StoreID")%>%
+  full_join(clientes, by="ClientID")
+
 
 novo_banco <- left_join(produtos, vendas, by= "ItemID")
 novo_banco2 <- left_join(relatorio, novo_banco, by= "SaleID")
@@ -83,11 +91,9 @@ histograma <- ggplot(analise1, aes(x = ano, y = receita_media, group = 1)) +
 histograma
 
 library(knitr)
-install.packages("kableExtra")
 
 # Carrega pacotes
 library(knitr)
-library(kableExtra)
 
 
 # ---------------------------------------------------------------
@@ -95,7 +101,7 @@ library(kableExtra)
 # ---------------------------------------------------------------
 
 clientela <- clientes %>%
-  select(Cli3ntID, Name, Age, Sex, Weight_lbs, Height_dm) %>%
+  select(ClientID, Name, Age, Sex, Weight_lbs, Height_dm) %>%
   mutate(
     Peso_kg = Weight_lbs * 0.453592,
     Altura_cm = Height_dm * 10
@@ -148,11 +154,6 @@ clientela |>
 
 # ANÁLISE 3 - Idade dos clientes de Âmbar Seco a depender da loja (26/10)
 
-cidades <- cidades %>%
-  rename(CityID = C1tyID)
-
-clientes <- clientes %>%
-  rename(ClientID = Cli3ntID)
 
 banco_completo <- relatorio %>%
   left_join(vendas, by = "SaleID") %>%
@@ -225,7 +226,9 @@ clientes_ambar %>%
 #ANALISE 4
 
 # === 1. Filtra o banco para o ano de 1889 ===
-lojas4 <- banco %>%
+
+
+lojas4 <- banco%>%
   mutate(Ano = year(Date)) %>%
   filter(Ano == 1889) %>%
   group_by(NameProduct, NameStore) %>%
@@ -234,7 +237,7 @@ lojas4 <- banco %>%
   filter(NameStore %in% c("Loja Ouro Fino", "Loja TendTudo", "Ferraria Apache")) %>%
   group_by(NameStore) %>%
   mutate(
-    freq_relativa = round(quantidade_total_vendida / sum(quantidade_total_vendida) * 100, 1)
+    freq_relativa = round(quantidade_total_vendida / sum(quantidade_total_vendida) * 100.1)
   ) %>%
   slice_max(order_by = quantidade_total_vendida, n = 3) %>%
   ungroup()
@@ -250,9 +253,23 @@ porcentagens <- str_c(lojas4$freq_relativa, "%") %>%
 legendas <- str_squish(str_c(lojas4$quantidade_total_vendida, " (", porcentagens, ")"))
 
 # === 5. Faz o gráfico bivariado padronizado ===
-bivariado <- ggplot(lojas4) +
+
+# === Cálculo do total vendido por loja para ordenar ===
+ordem_lojas <- lojas4 %>%
+  group_by(NameStore) %>%
+  summarise(total_loja = sum(quantidade_total_vendida)) %>%
+  arrange(desc(total_loja)) %>%
+  pull(NameStore)
+
+# === Gráfico padronizado com ordenação ===
+porcentagens <- str_c(lojas4$freq_relativa, "%") %>%
+  str_replace("\\.", ",")
+
+legendas <- str_squish(str_c(lojas4$quantidade_total_vendida, " (", porcentagens, ")"))
+
+bivariado<-ggplot(lojas4) +
   aes(
-    x = fct_reorder(NameStore, quantidade_total_vendida, .desc = TRUE),
+    x = factor(NameStore, levels = ordem_lojas),  # ordena pelo total vendido
     y = quantidade_total_vendida,
     fill = Nome_do_Produto,
     label = legendas
@@ -261,7 +278,7 @@ bivariado <- ggplot(lojas4) +
   geom_text(
     position = position_dodge(width = .9),
     vjust = -0.5, hjust = 0.5,
-    size = 3
+    size = 2.3
   ) +
   labs(
     x = "Loja",
@@ -270,46 +287,3 @@ bivariado <- ggplot(lojas4) +
   theme_estat()
 
 ggsave("colunas-bi-freq.pdf", width = 158, height = 93, units = "mm")
- view(bivariado)
-
- porcentagens <- str_c(lojas4$freq_relativa, "%") %>%
-   str_replace("\\.", ",")
- 
- legendas <- str_squish(str_c(lojas4$quantidade_total_vendida, " (", porcentagens, ")"))
- ggsave("colunas-bi-freq.pdf", width = 158, height = 93, units = "mm")
- 
- # === Cálculo do total vendido por loja para ordenar ===
- ordem_lojas <- lojas4 %>%
-   group_by(NameStore) %>%
-   summarise(total_loja = sum(quantidade_total_vendida)) %>%
-   arrange(desc(total_loja)) %>%
-   pull(NameStore)
- 
- # === Gráfico padronizado com ordenação ===
- porcentagens <- str_c(lojas4$freq_relativa, "%") %>%
-   str_replace("\\.", ",")
- 
- legendas <- str_squish(str_c(lojas4$quantidade_total_vendida, " (", porcentagens, ")"))
- 
- ggplot(lojas4) +
-   aes(
-     x = factor(NameStore, levels = ordem_lojas),  # ordena pelo total vendido
-     y = quantidade_total_vendida,
-     fill = Nome_do_Produto,
-     label = legendas
-   ) +
-   geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
-   geom_text(
-     position = position_dodge(width = .9),
-     vjust = -0.5, hjust = 0.5,
-     size = 2.3
-   ) +
-   labs(
-     x = "Loja",
-     y = "Frequência"
-   ) +
-   theme_estat()
- 
- ggsave("colunas-bi-freq.pdf", width = 158, height = 93, units = "mm")
- 
- 
